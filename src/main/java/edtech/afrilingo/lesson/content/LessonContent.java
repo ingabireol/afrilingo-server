@@ -23,9 +23,7 @@ public class LessonContent {
 
     @Column(columnDefinition = "TEXT")
     private String contentData;
-
     private String mediaUrl;
-
     @ManyToOne
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;

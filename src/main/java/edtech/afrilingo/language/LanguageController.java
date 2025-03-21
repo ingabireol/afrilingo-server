@@ -2,6 +2,10 @@ package edtech.afrilingo.language;
 
 import edtech.afrilingo.dto.ApiResponse;
 import edtech.afrilingo.exception.ResourceNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +20,14 @@ public class LanguageController {
 
     private final LanguageService languageService;
 
+    @Operation(
+            summary = "Get all languages",
+            description = "Retrieves a list of all available languages in the system"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Languages found",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+    })
     @GetMapping
     public ResponseEntity<ApiResponse<List<Language>>> getAllLanguages() {
         List<Language> languages = languageService.getAllLanguages();
