@@ -17,10 +17,8 @@ public class LessonContent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Enumerated(EnumType.STRING)
     private ContentType contentType; // TEXT, AUDIO, IMAGE
-
     @Column(columnDefinition = "TEXT")
     private String contentData;
     private String mediaUrl;
