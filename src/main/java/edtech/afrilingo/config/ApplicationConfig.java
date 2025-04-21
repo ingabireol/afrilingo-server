@@ -34,7 +34,6 @@ public class ApplicationConfig {
     authProvider.setPasswordEncoder(passwordEncoder());
     return authProvider;
   }
-
   @Bean
   public AuditorAware<Integer> auditorAware() {
     return new ApplicationAuditAware();

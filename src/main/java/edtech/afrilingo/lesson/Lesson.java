@@ -23,7 +23,6 @@ public class Lesson {
     private Long id;
     private String title;
     private String description;
-
     @Enumerated(EnumType.STRING)
     private LessonType type; // AUDIO, READING, IMAGE_OBJECT
 
