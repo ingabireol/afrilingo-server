@@ -1,6 +1,6 @@
 package edtech.afrilingo.question;
 
-import edtech.afrilingo.quiz.Option;
+import edtech.afrilingo.quiz.option.Option;
 import edtech.afrilingo.quiz.Quiz;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
