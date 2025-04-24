@@ -1,7 +1,7 @@
 package edtech.afrilingo.userProgress;
 
 import edtech.afrilingo.question.Question;
-import edtech.afrilingo.quiz.Option;
+import edtech.afrilingo.quiz.option.Option;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
