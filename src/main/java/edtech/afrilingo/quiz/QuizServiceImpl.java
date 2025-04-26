@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,11 @@ public class QuizServiceImpl implements QuizService {
     private final QuizRepository quizRepository;
     private final LessonService lessonService;
     private final QuestionRepository questionRepository;
+    public static void fun(){
+        List<Integer> nums = new ArrayList<>();
+        nums.stream().map(String::valueOf).collect(Collectors.joining(""));
+//        nums.stream().map(String::valueOf).collect(Collectors.joining(""));
+    }
 
     @Override
     public List<Quiz> getAllQuizzes() {
