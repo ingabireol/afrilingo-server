@@ -39,7 +39,7 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+//    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -52,9 +52,9 @@ public class SecurityConfiguration {
                                 .anyRequest()
                                 .authenticated()
                 )
-                .oauth2Login(httpSecurityOAuth2LoginConfigurer -> httpSecurityOAuth2LoginConfigurer
-                        .successHandler(oAuth2LoginSuccessHandler)
-                )
+//                .oauth2Login(httpSecurityOAuth2LoginConfigurer -> httpSecurityOAuth2LoginConfigurer
+//                        .successHandler(oAuth2LoginSuccessHandler)
+//                )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
