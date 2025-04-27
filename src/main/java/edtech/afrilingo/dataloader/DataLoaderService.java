@@ -28,7 +28,6 @@ import edtech.afrilingo.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -506,30 +505,30 @@ public class DataLoaderService {
                 content.append("* **").append(languageGreetings[i]).append("**");
                 if (languageCode.equals("RW")) {
                     switch (i) {
-                        case 0: content.append(" - Hello (to multiple people)"); break;
-                        case 1: content.append(" - Hello (to one person)"); break;
-                        case 2: content.append(" - Good morning"); break;
-                        case 3: content.append(" - Good afternoon/evening"); break;
-                        case 4: content.append(" - How are you?"); break;
-                        case 5: content.append(" - I'm fine"); break;
+                        case 0 -> content.append(" - Hello (to multiple people)");
+                        case 1 -> content.append(" - Hello (to one person)");
+                        case 2 -> content.append(" - Good morning");
+                        case 3 -> content.append(" - Good afternoon/evening");
+                        case 4 -> content.append(" - How are you?");
+                        case 5 -> content.append(" - I'm fine");
                     }
                 } else if (languageCode.equals("SW")) {
                     switch (i) {
-                        case 0: content.append(" - Hello"); break;
-                        case 1: content.append(" - How are you?"); break;
-                        case 2: content.append(" - How are you? (more casual)"); break;
-                        case 3: content.append(" - Good/fine"); break;
-                        case 4: content.append(" - How are you? (formal)"); break;
-                        case 5: content.append(" - I am fine"); break;
+                        case 0 -> content.append(" - Hello");
+                        case 1 -> content.append(" - How are you?");
+                        case 2 -> content.append(" - How are you? (more casual)");
+                        case 3 -> content.append(" - Good/fine");
+                        case 4 -> content.append(" - How are you? (formal)");
+                        case 5 -> content.append(" - I am fine");
                     }
                 } else {
                     switch (i) {
-                        case 0: content.append(" - General greeting"); break;
-                        case 1: content.append(" - Morning greeting"); break;
-                        case 2: content.append(" - Afternoon greeting"); break;
-                        case 3: content.append(" - Evening greeting"); break;
-                        case 4: content.append(" - Asking about someone's wellbeing"); break;
-                        case 5: content.append(" - Responding to 'How are you?'"); break;
+                        case 0 -> content.append(" - General greeting");
+                        case 1 -> content.append(" - Morning greeting");
+                        case 2 -> content.append(" - Afternoon greeting");
+                        case 3 -> content.append(" - Evening greeting");
+                        case 4 -> content.append(" - Asking about someone's wellbeing");
+                        case 5 -> content.append(" - Responding to 'How are you?'");
                     }
                 }
                 content.append("\n");
@@ -575,13 +574,13 @@ public class DataLoaderService {
             for (int i = 0; i < languageDays.length; i++) {
                 content.append("* **").append(languageDays[i]).append("**");
                 switch (i) {
-                    case 0: content.append(" - Monday"); break;
-                    case 1: content.append(" - Tuesday"); break;
-                    case 2: content.append(" - Wednesday"); break;
-                    case 3: content.append(" - Thursday"); break;
-                    case 4: content.append(" - Friday"); break;
-                    case 5: content.append(" - Saturday"); break;
-                    case 6: content.append(" - Sunday"); break;
+                    case 0 -> content.append(" - Monday");
+                    case 1 -> content.append(" - Tuesday");
+                    case 2 -> content.append(" - Wednesday");
+                    case 3 -> content.append(" - Thursday");
+                    case 4 -> content.append(" - Friday");
+                    case 5 -> content.append(" - Saturday");
+                    case 6 -> content.append(" - Sunday");
                 }
                 content.append("\n");
             }
@@ -593,18 +592,18 @@ public class DataLoaderService {
             for (int i = 0; i < languageMonths.length; i++) {
                 content.append("* **").append(languageMonths[i]).append("**");
                 switch (i) {
-                    case 0: content.append(" - January"); break;
-                    case 1: content.append(" - February"); break;
-                    case 2: content.append(" - March"); break;
-                    case 3: content.append(" - April"); break;
-                    case 4: content.append(" - May"); break;
-                    case 5: content.append(" - June"); break;
-                    case 6: content.append(" - July"); break;
-                    case 7: content.append(" - August"); break;
-                    case 8: content.append(" - September"); break;
-                    case 9: content.append(" - October"); break;
-                    case 10: content.append(" - November"); break;
-                    case 11: content.append(" - December"); break;
+                    case 0 -> content.append(" - January");
+                    case 1 -> content.append(" - February");
+                    case 2 -> content.append(" - March");
+                    case 3 -> content.append(" - April");
+                    case 4 -> content.append(" - May");
+                    case 5 -> content.append(" - June");
+                    case 6 -> content.append(" - July");
+                    case 7 -> content.append(" - August");
+                    case 8 -> content.append(" - September");
+                    case 9 -> content.append(" - October");
+                    case 10 -> content.append(" - November");
+                    case 11 -> content.append(" - December");
                 }
                 content.append("\n");
             }
@@ -665,8 +664,6 @@ public class DataLoaderService {
                 content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
             }
         } else if (lessonTitle.contains("Directions")) {
-            Map<String, Map<String, String>> directions = LanguageContentHelper.getDirectionPhrases();
-            Map<String, String> directionTerms = directions.get(languageCode);
             Map<String, Map<String, String>> directions = LanguageContentHelper.getDirectionPhrases();
             Map<String, String> directionTerms = directions.get(languageCode);
 
@@ -1304,59 +1301,333 @@ public class DataLoaderService {
     }
 
     private void createOptionsForQuestion(Question question, String languageCode) {
-        try {
-            List<Option> options = new ArrayList<>();
-            QuestionType type = question.getQuestionType();
-            String questionText = question.getQuestionText();
+        List<Option> options = new ArrayList<>();
+        QuestionType type = question.getQuestionType();
+        String questionText = question.getQuestionText();
 
-            if (type == QuestionType.MULTIPLE_CHOICE) {
-                if (questionText.contains("Hello") && "RW".equals(languageCode)) {
-                    options.add(Option.builder().optionText("Uraho").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Muraho").isCorrect(true).question(question).build());
-                    options.add(Option.builder().optionText("Mwaramutse").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Mwiriwe").isCorrect(false).question(question).build());
-                } else if (questionText.contains("greeting") && "SW".equals(languageCode)) {
-                    options.add(Option.builder().optionText("Jambo").isCorrect(true).question(question).build());
-                    options.add(Option.builder().optionText("Habari").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Nzuri").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Asante").isCorrect(false).question(question).build());
-                } else if (questionText.contains("morning")) {
-                    options.add(Option.builder().optionText("Good morning").isCorrect(true).question(question).build());
-                    options.add(Option.builder().optionText("Good afternoon").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Good evening").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Good night").isCorrect(false).question(question).build());
-                } else if (questionText.contains("Five") && "RW".equals(languageCode)) {
-                    options.add(Option.builder().optionText("Gatanu").isCorrect(true).question(question).build());
-                    options.add(Option.builder().optionText("Kabiri").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Gatatu").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Gatandatu").isCorrect(false).question(question).build());
-                } else if (questionText.contains("Three") && "SW".equals(languageCode)) {
-                    options.add(Option.builder().optionText("Mbili").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Tatu").isCorrect(true).question(question).build());
-                    options.add(Option.builder().optionText("Nne").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Tano").isCorrect(false).question(question).build());
-                } else if (questionText.contains("9")) {
-                    options.add(Option.builder().optionText("Nine").isCorrect(true).question(question).build());
-                    options.add(Option.builder().optionText("Seven").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Eight").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Ten").isCorrect(false).question(question).build());
-                } else if (questionText.contains("Father") && "RW".equals(languageCode)) {
-                    options.add(Option.builder().optionText("Mama").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Papa").isCorrect(true).question(question).build());
-                    options.add(Option.builder().optionText("Mukuru").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Mushiki").isCorrect(false).question(question).build());
-                } else if (questionText.contains("Sister") && "SW".equals(languageCode)) {
-                    options.add(Option.builder().optionText("Kaka").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Dada").isCorrect(true).question(question).build());
-                    options.add(Option.builder().optionText("Mama").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Baba").isCorrect(false).question(question).build());
-                } else if (questionText.contains("aunt")) {
-                    options.add(Option.builder().optionText("Uncle").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Aunt").isCorrect(true).question(question).build());
-                    options.add(Option.builder().optionText("Cousin").isCorrect(false).question(question).build());
-                    options.add(Option.builder().optionText("Niece").isCorrect(false).question(question).build());
-                } else if (questionText.contains("red")) {
-                    Map<String, Map<String, String>> colors = LanguageContentHelper.getColors();
-                    Map<String, String> colorTerms = colors.get(languageCode);
+        if (type == QuestionType.MULTIPLE_CHOICE) {
+            if (questionText.contains("Hello") && "RW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Uraho").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Muraho").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Mwaramutse").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Mwiriwe").isCorrect(false).question(question).build());
+            } else if (questionText.contains("greeting") && "SW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Jambo").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Habari").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Nzuri").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Asante").isCorrect(false).question(question).build());
+            } else if (questionText.contains("morning")) {
+                options.add(Option.builder().optionText("Good morning").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Good afternoon").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Good evening").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Good night").isCorrect(false).question(question).build());
+            } else if (questionText.contains("Five") && "RW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Gatanu").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Kabiri").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Gatatu").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Gatandatu").isCorrect(false).question(question).build());
+            } else if (questionText.contains("Three") && "SW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Mbili").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Tatu").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Nne").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Tano").isCorrect(false).question(question).build());
+            } else if (questionText.contains("9")) {
+                options.add(Option.builder().optionText("Nine").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Seven").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Eight").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Ten").isCorrect(false).question(question).build());
+            } else if (questionText.contains("Father") && "RW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Mama").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Papa").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Mukuru").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Mushiki").isCorrect(false).question(question).build());
+            } else if (questionText.contains("Sister") && "SW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Kaka").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Dada").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Mama").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Baba").isCorrect(false).question(question).build());
+            } else if (questionText.contains("aunt")) {
+                options.add(Option.builder().optionText("Uncle").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Aunt").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Cousin").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Niece").isCorrect(false).question(question).build());
+            } else if (questionText.contains("red")) {
+                Map<String, Map<String, String>> colors = LanguageContentHelper.getColors();
+                Map<String, String> colorTerms = colors.get(languageCode);
 
-                    options.add(Option.builder().optionText(colorTerms.get("red")).isCorrect(true).question(package edtech.afrilingo.dataloader
+                options.add(Option.builder().optionText(colorTerms.get("red")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(colorTerms.get("blue")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(colorTerms.get("green")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(colorTerms.get("yellow")).isCorrect(false).question(question).build());
+            } else if (questionText.contains("water")) {
+                Map<String, Map<String, String>> foodTerms = LanguageContentHelper.getFoodAndDrinks();
+                Map<String, String> terms = foodTerms.get(languageCode);
+
+                options.add(Option.builder().optionText(terms.get("water")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(terms.get("milk")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(terms.get("juice")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(terms.get("tea")).isCorrect(false).question(question).build());
+            } else if (questionText.contains("raining")) {
+                Map<String, Map<String, String>> weatherTerms = LanguageContentHelper.getWeatherTerms();
+                Map<String, String> terms = weatherTerms.get(languageCode);
+
+                options.add(Option.builder().optionText(terms.get("rainy")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(terms.get("sunny")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(terms.get("cloudy")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(terms.get("windy")).isCorrect(false).question(question).build());
+            } else if (questionText.contains("to eat")) {
+                Map<String, Map<String, String>> verbs = LanguageContentHelper.getCommonVerbs();
+                Map<String, String> verbTerms = verbs.get(languageCode);
+
+                options.add(Option.builder().optionText(verbTerms.get("to eat")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(verbTerms.get("to drink")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(verbTerms.get("to speak")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(verbTerms.get("to see")).isCorrect(false).question(question).build());
+            } else if (questionText.contains("Monday")) {
+                Map<String, String[]> days = LanguageContentHelper.getDaysOfWeek();
+                String[] dayTerms = days.get(languageCode);
+
+                options.add(Option.builder().optionText(dayTerms[0]).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(dayTerms[1]).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(dayTerms[2]).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(dayTerms[3]).isCorrect(false).question(question).build());
+            } else if (questionText.contains("left")) {
+                Map<String, Map<String, String>> directions = LanguageContentHelper.getDirectionPhrases();
+                Map<String, String> directionTerms = directions.get(languageCode);
+
+                options.add(Option.builder().optionText(directionTerms.get("left")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(directionTerms.get("right")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(directionTerms.get("straight ahead")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(directionTerms.get("turn around")).isCorrect(false).question(question).build());
+            } else {
+                // Generic options for other types of questions
+                options.add(Option.builder().optionText("Option A").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Option B").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Option C").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Option D").isCorrect(false).question(question).build());
+            }
+        } else if (type == QuestionType.TRUE_FALSE) {
+            // For True/False questions
+            if (questionText.contains("'Mwaramutse' means 'Good afternoon'") ||
+                    questionText.contains("'Habari gani?' is a formal greeting") ||
+                    questionText.contains("'How do you do?' is a common greeting") ||
+                    questionText.contains("'Umunani' means 'Seven'") ||
+                    questionText.contains("'Sita' means 'Seven'") ||
+                    questionText.contains("'Umukobwa' means 'Son'") ||
+                    questionText.contains("refers to hot weather") ||
+                    questionText.contains("means 'to listen'") ||
+                    questionText.contains("means 'south'") ||
+                    questionText.contains("that comes after December")) {
+
+                options.add(Option.builder().optionText("True").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("False").isCorrect(true).question(question).build());
+            } else {
+                options.add(Option.builder().optionText("True").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("False").isCorrect(false).question(question).build());
+            }
+        } else if (type == QuestionType.FILL_BLANK) {
+            // For Fill in the blank questions
+            if (questionText.contains("'My name is...'") && "RW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Nitwa").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Nkomoka").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Mwirirwe").isCorrect(false).question(question).build());
+            } else if (questionText.contains("'My name is...'") && "SW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Jina langu ni").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Ninatoka").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Habari yangu").isCorrect(false).question(question).build());
+            } else if (questionText.contains("I'm _____")) {
+                options.add(Option.builder().optionText("from").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("called").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("saying").isCorrect(false).question(question).build());
+            } else if (questionText.contains("'Ten'") && "RW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Icumi").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Cumi").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Gatanu").isCorrect(false).question(question).build());
+            } else if (questionText.contains("'Eight'") && "SW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Nane").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Sita").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Tisa").isCorrect(false).question(question).build());
+            } else if (questionText.contains("'7'")) {
+                options.add(Option.builder().optionText("Seven").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Five").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Six").isCorrect(false).question(question).build());
+            } else if (questionText.contains("'Mother'") && "RW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Mama").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Mushiki").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Mukobwa").isCorrect(false).question(question).build());
+            } else if (questionText.contains("'Brother'") && "SW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Kaka").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Dada").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Mjomba").isCorrect(false).question(question).build());
+            } else if (questionText.contains("grandfather")) {
+                options.add(Option.builder().optionText("Grandfather").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Cousin").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Uncle").isCorrect(false).question(question).build());
+            } else if (questionText.contains("'yellow'")) {
+                Map<String, Map<String, String>> colors = LanguageContentHelper.getColors();
+                Map<String, String> colorTerms = colors.get(languageCode);
+
+                options.add(Option.builder().optionText(colorTerms.get("yellow")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(colorTerms.get("green")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(colorTerms.get("orange")).isCorrect(false).question(question).build());
+            } else if (questionText.contains("'chicken'")) {
+                Map<String, Map<String, String>> foodTerms = LanguageContentHelper.getFoodAndDrinks();
+                Map<String, String> terms = foodTerms.get(languageCode);
+
+                options.add(Option.builder().optionText(terms.get("chicken")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(terms.get("meat")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(terms.get("fish")).isCorrect(false).question(question).build());
+            } else if (questionText.contains("'cloudy'")) {
+                Map<String, Map<String, String>> weatherTerms = LanguageContentHelper.getWeatherTerms();
+                Map<String, String> terms = weatherTerms.get(languageCode);
+
+                options.add(Option.builder().optionText(terms.get("cloudy")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(terms.get("rainy")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(terms.get("windy")).isCorrect(false).question(question).build());
+            } else if (questionText.contains("'to go'")) {
+                Map<String, Map<String, String>> verbs = LanguageContentHelper.getCommonVerbs();
+                Map<String, String> verbTerms = verbs.get(languageCode);
+
+                options.add(Option.builder().optionText(verbTerms.get("to go")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(verbTerms.get("to come")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(verbTerms.get("to walk")).isCorrect(false).question(question).build());
+            } else if (questionText.contains("'Friday'")) {
+                Map<String, String[]> days = LanguageContentHelper.getDaysOfWeek();
+                String[] dayTerms = days.get(languageCode);
+
+                options.add(Option.builder().optionText(dayTerms[4]).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(dayTerms[3]).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(dayTerms[5]).isCorrect(false).question(question).build());
+            } else if (questionText.contains("'straight ahead'")) {
+                Map<String, Map<String, String>> directions = LanguageContentHelper.getDirectionPhrases();
+                Map<String, String> directionTerms = directions.get(languageCode);
+
+                options.add(Option.builder().optionText(directionTerms.get("straight ahead")).isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText(directionTerms.get("left")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(directionTerms.get("right")).isCorrect(false).question(question).build());
+            } else {
+                // Generic options for other fill in the blank questions
+                options.add(Option.builder().optionText("Answer 1").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Answer 2").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Answer 3").isCorrect(false).question(question).build());
+            }
+        }
+
+        optionRepository.saveAll(options);
+    }
+
+    // Helper method to get language name from code
+    private String getLanguageName(String languageCode) {
+        return switch (languageCode) {
+            case "RW" -> "Kinyarwanda";
+            case "SW" -> "Kiswahili";
+            case "EN" -> "English";
+            default -> "Unknown Language";
+        };
+    }
+
+    // Helper method to create user profiles for sample users
+    @Transactional
+    public void createUserProfiles() {
+        // Get users
+        User john = userRepository.findByEmail("john@example.com").orElse(null);
+        User jane = userRepository.findByEmail("jane@example.com").orElse(null);
+        User robert = userRepository.findByEmail("robert@example.com").orElse(null);
+
+        if (john == null || jane == null || robert == null) {
+            return;  // Skip if users not found
+        }
+
+        // Get languages
+        List<Language> languages = languageRepository.findAll();
+        if (languages.isEmpty()) {
+            return;  // Skip if no languages
+        }
+
+        // Create John's profile - interested in Kinyarwanda
+        List<Language> johnLanguages = new ArrayList<>();
+        languages.stream()
+                .filter(lang -> "RW".equals(lang.getCode()))
+                .findFirst()
+                .ifPresent(johnLanguages::add);
+
+        UserProfile johnProfile = UserProfile.builder()
+                .user(john)
+                .country("United States")
+                .firstLanguage("English")
+                .reasonToLearn("Cultural appreciation")
+                .profilePicture("john-avatar.jpg")
+                .languagesToLearn(johnLanguages)
+                .dailyReminders(true)
+                .dailyGoalMinutes(15)
+                .preferredLearningTime("Evening (5PM-8PM)")
+                .build();
+
+        // Create Jane's profile - interested in Kiswahili
+        List<Language> janeLanguages = new ArrayList<>();
+        languages.stream()
+                .filter(lang -> "SW".equals(lang.getCode()))
+                .findFirst()
+                .ifPresent(janeLanguages::add);
+
+        UserProfile janeProfile = UserProfile.builder()
+                .user(jane)
+                .country("Canada")
+                .firstLanguage("French")
+                .reasonToLearn("Travel to African countries")
+                .profilePicture("jane-avatar.jpg")
+                .languagesToLearn(janeLanguages)
+                .dailyReminders(true)
+                .dailyGoalMinutes(30)
+                .preferredLearningTime("Morning (8AM-12PM)")
+                .build();
+
+        // Create Robert's profile - interested in both languages
+        List<Language> robertLanguages = new ArrayList<>();
+        languages.stream()
+                .filter(lang -> "RW".equals(lang.getCode()) || "SW".equals(lang.getCode()))
+                .forEach(robertLanguages::add);
+
+        UserProfile robertProfile = UserProfile.builder()
+                .user(robert)
+                .country("United Kingdom")
+                .firstLanguage("English")
+                .reasonToLearn("Business/work opportunities")
+                .profilePicture("robert-avatar.jpg")
+                .languagesToLearn(robertLanguages)
+                .dailyReminders(false)
+                .dailyGoalMinutes(20)
+                .preferredLearningTime("Afternoon (12PM-5PM)")
+                .build();
+
+        // Save profiles
+        userProfileRepository.save(johnProfile);
+        userProfileRepository.save(janeProfile);
+        userProfileRepository.save(robertProfile);
+    }
+
+    // Helper class for lesson data
+    static class LessonData {
+        private String title;
+        private String description;
+        private LessonType type;
+
+        public LessonData(String title, String description, LessonType type) {
+            this.title = title;
+            this.description = description;
+            this.type = type;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public LessonType getType() {
+            return type;
+        }
+    }
+}
