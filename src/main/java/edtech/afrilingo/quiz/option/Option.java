@@ -1,4 +1,4 @@
-package edtech.afrilingo.quiz;
+package edtech.afrilingo.quiz.option;
 
 import edtech.afrilingo.question.Question;
 import jakarta.persistence.*;

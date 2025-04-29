@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 public class ProfileSetupController {
 
     private final LanguageService languageService;
-
     @Operation(summary = "Get profile setup options", description = "Returns options for profile setup including countries, languages, and learning reasons")
     @GetMapping("/options")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getProfileSetupOptions() {
