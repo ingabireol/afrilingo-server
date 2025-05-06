@@ -4,6 +4,9 @@ import edtech.afrilingo.language.LanguageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,12 +52,25 @@ public class CourseServiceImpl implements CourseService {
         }
 
         // Set as active by default if not explicitly set to inactive
-        // Since isActive is a primitive boolean, it defaults to false if not set
         if (!course.isActive()) {
             course.setActive(true);
         }
 
-        return courseRepository.save(course);
+        // Create a new course instance to avoid any potential issues with the input object
+        Course newCourse = Course.builder()
+                .title(course.getTitle())
+                .description(course.getDescription())
+                .level(course.getLevel())
+                .image(course.getImage())
+                .isActive(course.isActive())
+                .language(course.getLanguage())
+                .build();
+
+        try {
+            return courseRepository.save(newCourse);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create course: " + e.getMessage(), e);
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package edtech.afrilingo.profile;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import edtech.afrilingo.language.Language;
 import edtech.afrilingo.user.User;
 import jakarta.persistence.*;
@@ -44,5 +45,6 @@ public class UserProfile {
     
     @OneToOne
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
 }

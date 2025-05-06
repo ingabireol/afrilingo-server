@@ -1,5 +1,6 @@
 package edtech.afrilingo.user;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edtech.afrilingo.profile.UserProfile;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private UserProfile profile;
 
     @Override
