@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
@@ -21,6 +23,23 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    private Long version = 0L;
+
+    @PrePersist
+    public void prePersist() {
+        if (version == null) {
+            version = 0L;
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        if (version == null) {
+            version = 0L;
+        }
+    }
+
     private String title;
     private String description;
     private String level;
@@ -29,6 +48,7 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "language_id")
+    @JsonBackReference
     private Language language;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
