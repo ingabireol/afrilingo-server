@@ -1,6 +1,7 @@
 package edtech.afrilingo.language;
 
 import edtech.afrilingo.course.Course;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,5 +27,6 @@ public class Language {
     private String flagImage;
     // Relationships
     @OneToMany(mappedBy = "language", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("language")
     private List<Course> courses;
 }

@@ -16,7 +16,7 @@ public class DataLoaderException extends RuntimeException {
      *
      * @param message the detail message
      * @param errorCode the error code representing the type of error
-     */
+     *
     public DataLoaderException(String message, DataLoaderErrorCode errorCode) {
         super(message);
         this.errorCode = errorCode;

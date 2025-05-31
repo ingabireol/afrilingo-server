@@ -27,11 +27,13 @@ import edtech.afrilingo.user.User;
 import edtech.afrilingo.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.Map.Entry;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class DataLoaderService {
 
@@ -351,47 +353,72 @@ public class DataLoaderService {
             }
 
             // Create admin user
-            RegisterRequest adminRequest = RegisterRequest.builder()
-                    .firstname("Admin")
-                    .lastname("User")
-                    .email("admin@afrilingo.com")
-                    .password("admin123")
-                    .role(Role.ROLE_ADMIN)
-                    .build();
-
-            authenticationService.register(adminRequest);
+            createUserWithProfile(
+                "Admin",
+                "User",
+                "admin@gmail.com",
+                "728728Clb@",
+                Role.ROLE_ADMIN,
+                "Rwanda",
+                "English",
+                "To help others learn African languages",
+                "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+                true,
+                60,
+                "09:00",
+                List.of("RW", "SW", "EN")
+            );
 
             // Create regular users
-            RegisterRequest user1Request = RegisterRequest.builder()
-                    .firstname("John")
-                    .lastname("Doe")
-                    .email("john@example.com")
-                    .password("password123")
-                    .role(Role.ROLE_USER)
-                    .build();
+            createUserWithProfile(
+                "Buntu",
+                "Levy Caleb",
+                "buntulevycaleb@gmail.com",
+                "728728Clb@",
+                Role.ROLE_USER,
+                "Rwanda",
+                "Kinyarwanda",
+                "To connect with my roots",
+                "https://api.dicebear.com/7.x/avataaars/svg?seed=buntu",
+                true,
+                30,
+                "19:00",
+                List.of("EN", "SW")
+            );
 
-            RegisterRequest user2Request = RegisterRequest.builder()
-                    .firstname("Jane")
-                    .lastname("Smith")
-                    .email("jane@example.com")
-                    .password("password123")
-                    .role(Role.ROLE_USER)
-                    .build();
+            createUserWithProfile(
+                "Jane",
+                "Smith",
+                "jane@example.com",
+                "728728Clb@",
+                Role.ROLE_USER,
+                "Kenya",
+                "English",
+                "Travel to East Africa",
+                "https://api.dicebear.com/7.x/avataaars/svg?seed=jane",
+                true,
+                20,
+                "08:00",
+                List.of("SW", "RW")
+            );
 
-            RegisterRequest user3Request = RegisterRequest.builder()
-                    .firstname("Robert")
-                    .lastname("Johnson")
-                    .email("robert@example.com")
-                    .password("password123")
-                    .role(Role.ROLE_USER)
-                    .build();
+            createUserWithProfile(
+                "Robert",
+                "Johnson",
+                "robert@example.com",
+                "728728Clb@",
+                Role.ROLE_USER,
+                "South Africa",
+                "English",
+                "Business opportunities",
+                "https://api.dicebear.com/7.x/avataaars/svg?seed=robert",
+                false,
+                15,
+                "20:00",
+                List.of("RW")
+            );
 
-            authenticationService.register(user1Request);
-            authenticationService.register(user2Request);
-            authenticationService.register(user3Request);
-
-            // Create user profiles
-            createUserProfiles();
+            log.info("Successfully created {} users with profiles", userRepository.count());
         } catch (Exception e) {
             throw new DataLoaderException("Failed to load users: " + e.getMessage(),
                     e, DataLoaderException.DataLoaderErrorCode.USER_LOAD_ERROR);
@@ -501,37 +528,41 @@ public class DataLoaderService {
             String[] languageGreetings = greetings.get(languageCode);
 
             content.append("## Common Greetings\n\n");
-            for (int i = 0; i < Math.min(6, languageGreetings.length); i++) {
-                content.append("* **").append(languageGreetings[i]).append("**");
-                if (languageCode.equals("RW")) {
-                    switch (i) {
-                        case 0 -> content.append(" - Hello (to multiple people)");
-                        case 1 -> content.append(" - Hello (to one person)");
-                        case 2 -> content.append(" - Good morning");
-                        case 3 -> content.append(" - Good afternoon/evening");
-                        case 4 -> content.append(" - How are you?");
-                        case 5 -> content.append(" - I'm fine");
+            if (languageGreetings != null) {
+                for (int i = 0; i < Math.min(6, languageGreetings.length); i++) {
+                    content.append("* **").append(languageGreetings[i]).append("**");
+                    if (languageCode.equals("RW")) {
+                        switch (i) {
+                            case 0 -> content.append(" - Hello (to multiple people)");
+                            case 1 -> content.append(" - Hello (to one person)");
+                            case 2 -> content.append(" - Good morning");
+                            case 3 -> content.append(" - Good afternoon/evening");
+                            case 4 -> content.append(" - How are you?");
+                            case 5 -> content.append(" - I'm fine");
+                        }
+                    } else if (languageCode.equals("SW")) {
+                        switch (i) {
+                            case 0 -> content.append(" - Hello");
+                            case 1 -> content.append(" - How are you?");
+                            case 2 -> content.append(" - How are you? (more casual)");
+                            case 3 -> content.append(" - Good/fine");
+                            case 4 -> content.append(" - How are you? (formal)");
+                            case 5 -> content.append(" - I am fine");
+                        }
+                    } else {
+                        switch (i) {
+                            case 0 -> content.append(" - General greeting");
+                            case 1 -> content.append(" - Morning greeting");
+                            case 2 -> content.append(" - Afternoon greeting");
+                            case 3 -> content.append(" - Evening greeting");
+                            case 4 -> content.append(" - Asking about someone's wellbeing");
+                            case 5 -> content.append(" - Responding to 'How are you?'");
+                        }
                     }
-                } else if (languageCode.equals("SW")) {
-                    switch (i) {
-                        case 0 -> content.append(" - Hello");
-                        case 1 -> content.append(" - How are you?");
-                        case 2 -> content.append(" - How are you? (more casual)");
-                        case 3 -> content.append(" - Good/fine");
-                        case 4 -> content.append(" - How are you? (formal)");
-                        case 5 -> content.append(" - I am fine");
-                    }
-                } else {
-                    switch (i) {
-                        case 0 -> content.append(" - General greeting");
-                        case 1 -> content.append(" - Morning greeting");
-                        case 2 -> content.append(" - Afternoon greeting");
-                        case 3 -> content.append(" - Evening greeting");
-                        case 4 -> content.append(" - Asking about someone's wellbeing");
-                        case 5 -> content.append(" - Responding to 'How are you?'");
-                    }
+                    content.append("\n");
                 }
-                content.append("\n");
+            } else {
+                content.append("* No greetings available for this language code: ").append(languageCode).append("\n");
             }
 
             content.append("\n## Introduction Phrases\n\n");
@@ -539,149 +570,210 @@ public class DataLoaderService {
             Map<String, Map<String, String>> commonPhrases = LanguageContentHelper.getCommonPhrases();
             Map<String, String> phrases = commonPhrases.get(languageCode);
 
-            content.append("* **").append(phrases.get("My name is...")).append("** - Introducing yourself\n");
-            if (languageCode.equals("RW")) {
-                content.append("* **Nkomoka...** - I come from...\n");
-                content.append("* **Ni byiza kuguhura** - Nice to meet you\n");
-            } else if (languageCode.equals("SW")) {
-                content.append("* **Ninatoka...** - I come from...\n");
-                content.append("* **Nimefurahi kukuona** - Nice to meet you\n");
+            if (phrases != null) {
+                String myNameIs = phrases.get("My name is...");
+                if (myNameIs != null) {
+                    content.append("* **").append(myNameIs).append("** - Introducing yourself\n");
+                }
+                
+                if (languageCode.equals("RW")) {
+                    content.append("* **Nkomoka...** - I come from...\n");
+                    content.append("* **Ni byiza kuguhura** - Nice to meet you\n");
+                } else if (languageCode.equals("SW")) {
+                    content.append("* **Ninatoka...** - I come from...\n");
+                    content.append("* **Nimefurahi kukuona** - Nice to meet you\n");
+                } else {
+                    content.append("* **I'm from...** - Stating where you're from\n");
+                    content.append("* **Nice to meet you** - Polite expression after introduction\n");
+                }
             } else {
-                content.append("* **I'm from...** - Stating where you're from\n");
-                content.append("* **Nice to meet you** - Polite expression after introduction\n");
+                content.append("* No introduction phrases available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Numbers")) {
             Map<String, String[]> numbers = LanguageContentHelper.getNumbers();
             String[] languageNumbers = numbers.get(languageCode);
 
             content.append("## Numbers 1-10\n\n");
-            for (int i = 0; i < languageNumbers.length; i++) {
-                content.append("* **").append(languageNumbers[i]).append("** - ").append(i + 1).append("\n");
+            if (languageNumbers != null) {
+                for (int i = 0; i < languageNumbers.length; i++) {
+                    content.append("* **").append(languageNumbers[i]).append("** - ").append(i + 1).append("\n");
+                }
+            } else {
+                content.append("* No number terms available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Family")) {
             Map<String, Map<String, String>> familyTerms = LanguageContentHelper.getFamilyTerms();
             Map<String, String> terms = familyTerms.get(languageCode);
 
             content.append("## Family Terms\n\n");
-            for (Entry<String, String> entry : terms.entrySet()) {
-                content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+            if (terms != null) {
+                for (Entry<String, String> entry : terms.entrySet()) {
+                    content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+                }
+            } else {
+                content.append("* No family terms available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Days")) {
             Map<String, String[]> days = LanguageContentHelper.getDaysOfWeek();
             String[] languageDays = days.get(languageCode);
 
             content.append("## Days of the Week\n\n");
-            for (int i = 0; i < languageDays.length; i++) {
-                content.append("* **").append(languageDays[i]).append("**");
-                switch (i) {
-                    case 0 -> content.append(" - Monday");
-                    case 1 -> content.append(" - Tuesday");
-                    case 2 -> content.append(" - Wednesday");
-                    case 3 -> content.append(" - Thursday");
-                    case 4 -> content.append(" - Friday");
-                    case 5 -> content.append(" - Saturday");
-                    case 6 -> content.append(" - Sunday");
+            if (languageDays != null) {
+                for (int i = 0; i < languageDays.length; i++) {
+                    content.append("* **").append(languageDays[i]).append("**");
+                    switch (i) {
+                        case 0 -> content.append(" - Monday");
+                        case 1 -> content.append(" - Tuesday");
+                        case 2 -> content.append(" - Wednesday");
+                        case 3 -> content.append(" - Thursday");
+                        case 4 -> content.append(" - Friday");
+                        case 5 -> content.append(" - Saturday");
+                        case 6 -> content.append(" - Sunday");
+                    }
+                    content.append("\n");
                 }
-                content.append("\n");
+            } else {
+                content.append("* No day terms available for this language code: ").append(languageCode).append("\n");
             }
 
             Map<String, String[]> months = LanguageContentHelper.getMonthsOfYear();
             String[] languageMonths = months.get(languageCode);
 
             content.append("\n## Months of the Year\n\n");
-            for (int i = 0; i < languageMonths.length; i++) {
-                content.append("* **").append(languageMonths[i]).append("**");
-                switch (i) {
-                    case 0 -> content.append(" - January");
-                    case 1 -> content.append(" - February");
-                    case 2 -> content.append(" - March");
-                    case 3 -> content.append(" - April");
-                    case 4 -> content.append(" - May");
-                    case 5 -> content.append(" - June");
-                    case 6 -> content.append(" - July");
-                    case 7 -> content.append(" - August");
-                    case 8 -> content.append(" - September");
-                    case 9 -> content.append(" - October");
-                    case 10 -> content.append(" - November");
-                    case 11 -> content.append(" - December");
+            if (languageMonths != null) {
+                for (int i = 0; i < languageMonths.length; i++) {
+                    content.append("* **").append(languageMonths[i]).append("**");
+                    switch (i) {
+                        case 0 -> content.append(" - January");
+                        case 1 -> content.append(" - February");
+                        case 2 -> content.append(" - March");
+                        case 3 -> content.append(" - April");
+                        case 4 -> content.append(" - May");
+                        case 5 -> content.append(" - June");
+                        case 6 -> content.append(" - July");
+                        case 7 -> content.append(" - August");
+                        case 8 -> content.append(" - September");
+                        case 9 -> content.append(" - October");
+                        case 10 -> content.append(" - November");
+                        case 11 -> content.append(" - December");
+                    }
+                    content.append("\n");
                 }
-                content.append("\n");
+            } else {
+                content.append("* No month terms available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Phrases")) {
             Map<String, Map<String, String>> commonPhrases = LanguageContentHelper.getCommonPhrases();
             Map<String, String> phrases = commonPhrases.get(languageCode);
 
             content.append("## Essential Phrases\n\n");
-            for (Entry<String, String> entry : phrases.entrySet()) {
-                content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+            if (phrases != null) {
+                for (Entry<String, String> entry : phrases.entrySet()) {
+                    content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+                }
+            } else {
+                content.append("* No phrases available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Colors")) {
             Map<String, Map<String, String>> colors = LanguageContentHelper.getColors();
             Map<String, String> colorTerms = colors.get(languageCode);
 
             content.append("## Color Terms\n\n");
-            for (Entry<String, String> entry : colorTerms.entrySet()) {
-                content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+            if (colorTerms != null) {
+                for (Entry<String, String> entry : colorTerms.entrySet()) {
+                    content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+                }
+            } else {
+                content.append("* No color terms available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Food")) {
             Map<String, Map<String, String>> foodAndDrinks = LanguageContentHelper.getFoodAndDrinks();
             Map<String, String> terms = foodAndDrinks.get(languageCode);
 
             content.append("## Food and Drinks\n\n");
-            for (Entry<String, String> entry : terms.entrySet()) {
-                content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+            if (terms != null) {
+                for (Entry<String, String> entry : terms.entrySet()) {
+                    content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+                }
+            } else {
+                content.append("* No food and drink terms available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Weather")) {
             Map<String, Map<String, String>> weatherTerms = LanguageContentHelper.getWeatherTerms();
             Map<String, String> terms = weatherTerms.get(languageCode);
 
             content.append("## Weather Terms\n\n");
-            for (Entry<String, String> entry : terms.entrySet()) {
-                content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+            if (terms != null) {
+                for (Entry<String, String> entry : terms.entrySet()) {
+                    content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+                }
+            } else {
+                content.append("* No weather terms available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Verbs")) {
             Map<String, Map<String, String>> verbs = LanguageContentHelper.getCommonVerbs();
             Map<String, String> verbTerms = verbs.get(languageCode);
 
             content.append("## Common Verbs\n\n");
-            for (Entry<String, String> entry : verbTerms.entrySet()) {
-                content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+            if (verbTerms != null) {
+                for (Entry<String, String> entry : verbTerms.entrySet()) {
+                    content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+                }
+            } else {
+                content.append("* No verb terms available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Past")) {
             Map<String, Map<String, String>> pastTense = LanguageContentHelper.getPastTenseExamples();
             Map<String, String> examples = pastTense.get(languageCode);
 
             content.append("## Past Tense Examples\n\n");
-            for (Entry<String, String> entry : examples.entrySet()) {
-                content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+            if (examples != null) {
+                for (Entry<String, String> entry : examples.entrySet()) {
+                    content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+                }
+            } else {
+                content.append("* No past tense examples available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Future")) {
             Map<String, Map<String, String>> futureTense = LanguageContentHelper.getFutureTenseExamples();
             Map<String, String> examples = futureTense.get(languageCode);
 
             content.append("## Future Tense Examples\n\n");
-            for (Entry<String, String> entry : examples.entrySet()) {
-                content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+            if (examples != null) {
+                for (Entry<String, String> entry : examples.entrySet()) {
+                    content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+                }
+            } else {
+                content.append("* No future tense examples available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Directions")) {
             Map<String, Map<String, String>> directions = LanguageContentHelper.getDirectionPhrases();
             Map<String, String> directionTerms = directions.get(languageCode);
 
             content.append("## Direction and Navigation Terms\n\n");
-            for (Entry<String, String> entry : directionTerms.entrySet()) {
-                content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+            if (directionTerms != null) {
+                for (Entry<String, String> entry : directionTerms.entrySet()) {
+                    content.append("* **").append(entry.getValue()).append("** - ").append(entry.getKey()).append("\n");
+                }
+            } else {
+                content.append("* No direction terms available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Idioms")) {
             Map<String, Map<String, String>> idioms = LanguageContentHelper.getIdiomsAndProverbs();
             Map<String, String> idiomList = idioms.get(languageCode);
 
             content.append("## Idioms and Proverbs\n\n");
-            for (Entry<String, String> entry : idiomList.entrySet()) {
-                content.append("* **").append(entry.getKey()).append("** - ").append(entry.getValue()).append("\n");
+            if (idiomList != null) {
+                for (Entry<String, String> entry : idiomList.entrySet()) {
+                    content.append("* **").append(entry.getKey()).append("** - ").append(entry.getValue()).append("\n");
+                }
+            } else {
+                content.append("* No idioms available for this language code: ").append(languageCode).append("\n");
             }
         } else if (lessonTitle.contains("Culture")) {
             content.append("## Cultural Context\n\n");
-            content.append(LanguageContentHelper.getCulturalNote(languageCode));
+            String culturalNote = LanguageContentHelper.getCulturalNote(languageCode);
+            content.append(culturalNote != null ? culturalNote : "Cultural information not available for this language code: " + languageCode);
         } else {
             // Generic content for other lesson types
             content.append("## Introduction\n\n");
@@ -752,7 +844,7 @@ public class DataLoaderService {
 
             // True/False question
             Question q2 = Question.builder()
-                    .questionText("In Kinyarwanda, 'Mwaramutse' means 'Good afternoon'.")
+                    .questionText("'Mwaramutse' means 'Good afternoon'.")
                     .questionType(QuestionType.TRUE_FALSE)
                     .points(1)
                     .quiz(quiz)
@@ -800,7 +892,7 @@ public class DataLoaderService {
         } else {
             // Multiple choice question
             Question q1 = Question.builder()
-                    .questionText("What greeting would you use in the morning?")
+                    .questionText("Which greeting would you use in the morning?")
                     .questionType(QuestionType.MULTIPLE_CHOICE)
                     .points(1)
                     .quiz(quiz)
@@ -1019,6 +1111,37 @@ public class DataLoaderService {
         Map<String, Map<String, String>> colors = LanguageContentHelper.getColors();
         Map<String, String> colorTerms = colors.get(languageCode);
 
+        // Check if we have valid data for this language
+        if (colorTerms == null) {
+            // Create generic questions if language-specific data is not available
+            Question q1 = Question.builder()
+                    .questionText("Which of these is a primary color?")
+                    .questionType(QuestionType.MULTIPLE_CHOICE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q2 = Question.builder()
+                    .questionText("Blue and yellow mixed together make green.")
+                    .questionType(QuestionType.TRUE_FALSE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q3 = Question.builder()
+                    .questionText("The color of the sky is usually _____.")
+                    .questionType(QuestionType.FILL_BLANK)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            questions.add(q1);
+            questions.add(q2);
+            questions.add(q3);
+            
+            return questions;
+        }
+
         // Multiple choice question
         Question q1 = Question.builder()
                 .questionText("What is the word for 'red' in " + getLanguageName(languageCode) + "?")
@@ -1061,6 +1184,37 @@ public class DataLoaderService {
         List<Question> questions = new ArrayList<>();
         Map<String, Map<String, String>> foodTerms = LanguageContentHelper.getFoodAndDrinks();
         Map<String, String> terms = foodTerms.get(languageCode);
+
+        // Check if we have valid data for this language
+        if (terms == null) {
+            // Create generic questions if language-specific data is not available
+            Question q1 = Question.builder()
+                    .questionText("Which of these is a type of fruit?")
+                    .questionType(QuestionType.MULTIPLE_CHOICE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q2 = Question.builder()
+                    .questionText("Rice is a type of vegetable.")
+                    .questionType(QuestionType.TRUE_FALSE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q3 = Question.builder()
+                    .questionText("A common drink made from coffee beans is _____.")
+                    .questionType(QuestionType.FILL_BLANK)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            questions.add(q1);
+            questions.add(q2);
+            questions.add(q3);
+            
+            return questions;
+        }
 
         // Multiple choice question
         Question q1 = Question.builder()
@@ -1105,6 +1259,37 @@ public class DataLoaderService {
         Map<String, Map<String, String>> weatherTerms = LanguageContentHelper.getWeatherTerms();
         Map<String, String> terms = weatherTerms.get(languageCode);
 
+        // Check if we have valid data for this language
+        if (terms == null) {
+            // Create generic questions if language-specific data is not available
+            Question q1 = Question.builder()
+                    .questionText("What is the weather like on a sunny day?")
+                    .questionType(QuestionType.MULTIPLE_CHOICE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q2 = Question.builder()
+                    .questionText("Rain is a type of weather phenomenon.")
+                    .questionType(QuestionType.TRUE_FALSE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q3 = Question.builder()
+                    .questionText("The weather condition with clouds covering the sky is _____.")
+                    .questionType(QuestionType.FILL_BLANK)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            questions.add(q1);
+            questions.add(q2);
+            questions.add(q3);
+            
+            return questions;
+        }
+
         // Multiple choice question
         Question q1 = Question.builder()
                 .questionText("How do you say 'It's raining' in " + getLanguageName(languageCode) + "?")
@@ -1147,6 +1332,37 @@ public class DataLoaderService {
         List<Question> questions = new ArrayList<>();
         Map<String, Map<String, String>> verbs = LanguageContentHelper.getCommonVerbs();
         Map<String, String> verbTerms = verbs.get(languageCode);
+
+        // Check if we have valid data for this language
+        if (verbTerms == null) {
+            // Create generic questions if language-specific data is not available
+            Question q1 = Question.builder()
+                    .questionText("What is the verb for 'to run' in English?")
+                    .questionType(QuestionType.MULTIPLE_CHOICE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q2 = Question.builder()
+                    .questionText("'To eat' is a verb in English.")
+                    .questionType(QuestionType.TRUE_FALSE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q3 = Question.builder()
+                    .questionText("The verb for 'to walk' in English is _____.")
+                    .questionType(QuestionType.FILL_BLANK)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            questions.add(q1);
+            questions.add(q2);
+            questions.add(q3);
+            
+            return questions;
+        }
 
         // Multiple choice question
         Question q1 = Question.builder()
@@ -1194,6 +1410,37 @@ public class DataLoaderService {
         Map<String, String[]> months = LanguageContentHelper.getMonthsOfYear();
         String[] monthTerms = months.get(languageCode);
 
+        // Check if we have valid data for this language
+        if (dayTerms == null || monthTerms == null) {
+            // Create generic questions if language-specific data is not available
+            Question q1 = Question.builder()
+                    .questionText("Which day comes after Sunday?")
+                    .questionType(QuestionType.MULTIPLE_CHOICE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q2 = Question.builder()
+                    .questionText("January is the first month of the year.")
+                    .questionType(QuestionType.TRUE_FALSE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q3 = Question.builder()
+                    .questionText("The month that comes after April is _____.")
+                    .questionType(QuestionType.FILL_BLANK)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            questions.add(q1);
+            questions.add(q2);
+            questions.add(q3);
+            
+            return questions;
+        }
+
         // Multiple choice question
         Question q1 = Question.builder()
                 .questionText("What is the word for 'Monday' in " + getLanguageName(languageCode) + "?")
@@ -1231,6 +1478,37 @@ public class DataLoaderService {
         List<Question> questions = new ArrayList<>();
         Map<String, Map<String, String>> directions = LanguageContentHelper.getDirectionPhrases();
         Map<String, String> directionTerms = directions.get(languageCode);
+
+        // Check if we have valid data for this language
+        if (directionTerms == null || directionTerms.get("north") == null) {
+            // Create generic questions if language-specific data is not available
+            Question q1 = Question.builder()
+                    .questionText("Which direction is opposite to north?")
+                    .questionType(QuestionType.MULTIPLE_CHOICE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q2 = Question.builder()
+                    .questionText("East is the direction where the sun rises.")
+                    .questionType(QuestionType.TRUE_FALSE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q3 = Question.builder()
+                    .questionText("The direction opposite to west is _____.")
+                    .questionType(QuestionType.FILL_BLANK)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            questions.add(q1);
+            questions.add(q2);
+            questions.add(q3);
+            
+            return questions;
+        }
 
         // Multiple choice question
         Question q1 = Question.builder()
@@ -1330,7 +1608,7 @@ public class DataLoaderService {
                 options.add(Option.builder().optionText("Mbili").isCorrect(false).question(question).build());
                 options.add(Option.builder().optionText("Tatu").isCorrect(true).question(question).build());
                 options.add(Option.builder().optionText("Nne").isCorrect(false).question(question).build());
-                options.add(Option.builder().optionText("Tano").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Tisa").isCorrect(false).question(question).build());
             } else if (questionText.contains("9")) {
                 options.add(Option.builder().optionText("Nine").isCorrect(true).question(question).build());
                 options.add(Option.builder().optionText("Seven").isCorrect(false).question(question).build());
@@ -1526,91 +1804,104 @@ public class DataLoaderService {
         };
     }
 
-    // Helper method to create user profiles for sample users
+    /**
+     * Helper method to create a user with a profile in a single transaction
+     */
     @Transactional
-    public void createUserProfiles() {
-        // Get users
-        User john = userRepository.findByEmail("john@example.com").orElse(null);
-        User jane = userRepository.findByEmail("jane@example.com").orElse(null);
-        User robert = userRepository.findByEmail("robert@example.com").orElse(null);
+    public User createUserWithProfile(
+            String firstName,
+            String lastName,
+            String email,
+            String password,
+            Role role,
+            String country,
+            String firstLanguage,
+            String reasonToLearn,
+            String profilePicture,
+            boolean dailyReminders,
+            int dailyGoalMinutes,
+            String preferredLearningTime,
+            List<String> languageCodes) {
+        
+        // Create user
+        RegisterRequest request = RegisterRequest.builder()
+                .firstname(firstName)
+                .lastname(lastName)
+                .email(email)
+                .password(password)
+                .role(role)
+                .build();
 
-        if (john == null || jane == null || robert == null) {
-            return;  // Skip if users not found
+        // Register user (this will save the user)
+        authenticationService.register(request);
+        
+        // Get the created user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Failed to find created user: " + email));
+        
+        // Create and save user profile
+        createUserProfile(user, country, firstLanguage, reasonToLearn, 
+                profilePicture, dailyReminders, dailyGoalMinutes, 
+                preferredLearningTime, languageCodes);
+        
+        return user;
+    }
+
+    /**
+     * Helper method to create a user profile
+     */
+    @Transactional
+    public void createUserProfile(
+            User user,
+            String country,
+            String firstLanguage,
+            String reasonToLearn,
+            String profilePicture,
+            boolean dailyReminders,
+            int dailyGoalMinutes,
+            String preferredLearningTime,
+            List<String> languageCodes) {
+        
+        // Check if profile already exists
+        // Use user.getId() with findByUserId
+        if (userProfileRepository.findByUserId(user.getId()).isPresent()) {
+            return; // Skip if profile already exists
         }
 
-        // Get languages
-        List<Language> languages = languageRepository.findAll();
-        if (languages.isEmpty()) {
-            return;  // Skip if no languages
+        // Get languages to learn
+        // Implement findByCodeIn manually since it doesn't exist
+        List<Language> languagesToLearn = new ArrayList<>();
+        for (String code : languageCodes) {
+            languageRepository.findByCode(code).ifPresent(languagesToLearn::add);
         }
 
-        // Create John's profile - interested in Kinyarwanda
-        List<Language> johnLanguages = new ArrayList<>();
-        languages.stream()
-                .filter(lang -> "RW".equals(lang.getCode()))
-                .findFirst()
-                .ifPresent(johnLanguages::add);
+        if (languagesToLearn.isEmpty()) {
+            log.warn("No valid language codes found for user: {}", user.getEmail());
+            return;
+        }
 
-        UserProfile johnProfile = UserProfile.builder()
-                .user(john)
-                .country("United States")
-                .firstLanguage("English")
-                .reasonToLearn("Cultural appreciation")
-                .profilePicture("john-avatar.jpg")
-                .languagesToLearn(johnLanguages)
-                .dailyReminders(true)
-                .dailyGoalMinutes(15)
-                .preferredLearningTime("Evening (5PM-8PM)")
+        // Create and save profile
+        UserProfile profile = UserProfile.builder()
+                .user(user)
+                .country(country)
+                .firstLanguage(firstLanguage)
+                .reasonToLearn(reasonToLearn)
+                .profilePicture(profilePicture)
+                .languagesToLearn(languagesToLearn)
+                .dailyReminders(dailyReminders)
+                .dailyGoalMinutes(dailyGoalMinutes)
+                .preferredLearningTime(preferredLearningTime)
                 .build();
 
-        // Create Jane's profile - interested in Kiswahili
-        List<Language> janeLanguages = new ArrayList<>();
-        languages.stream()
-                .filter(lang -> "SW".equals(lang.getCode()))
-                .findFirst()
-                .ifPresent(janeLanguages::add);
-
-        UserProfile janeProfile = UserProfile.builder()
-                .user(jane)
-                .country("Canada")
-                .firstLanguage("French")
-                .reasonToLearn("Travel to African countries")
-                .profilePicture("jane-avatar.jpg")
-                .languagesToLearn(janeLanguages)
-                .dailyReminders(true)
-                .dailyGoalMinutes(30)
-                .preferredLearningTime("Morning (8AM-12PM)")
-                .build();
-
-        // Create Robert's profile - interested in both languages
-        List<Language> robertLanguages = new ArrayList<>();
-        languages.stream()
-                .filter(lang -> "RW".equals(lang.getCode()) || "SW".equals(lang.getCode()))
-                .forEach(robertLanguages::add);
-
-        UserProfile robertProfile = UserProfile.builder()
-                .user(robert)
-                .country("United Kingdom")
-                .firstLanguage("English")
-                .reasonToLearn("Business/work opportunities")
-                .profilePicture("robert-avatar.jpg")
-                .languagesToLearn(robertLanguages)
-                .dailyReminders(false)
-                .dailyGoalMinutes(20)
-                .preferredLearningTime("Afternoon (12PM-5PM)")
-                .build();
-
-        // Save profiles
-        userProfileRepository.save(johnProfile);
-        userProfileRepository.save(janeProfile);
-        userProfileRepository.save(robertProfile);
+        userProfileRepository.save(profile);
+        log.info("Created profile for user: {}", user.getEmail());
     }
 
     // Helper class for lesson data
-    static class LessonData {
-        private String title;
-        private String description;
-        private LessonType type;
+    class LessonData {
+        private final String title;
+        private final String description;
+        private final LessonType type;
 
         public LessonData(String title, String description, LessonType type) {
             this.title = title;
@@ -1631,3 +1922,4 @@ public class DataLoaderService {
         }
     }
 }
+
