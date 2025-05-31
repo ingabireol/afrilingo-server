@@ -71,11 +71,52 @@ public class UserDashboardService {
         // Get course progress for each course the user has engaged with
         Map<Long, Double> courseProgress = calculateCourseProgress(userId, allUserProgress);
         
-        dashboardData.put("userProfile", userProfile);
-        dashboardData.put("languagesToLearn", languagesToLearn);
-        dashboardData.put("coursesByLanguage", coursesByLanguage);
+        // Create a UserProfileDTO to avoid circular references
+        Map<String, Object> profileDTO = new HashMap<>();
+        profileDTO.put("id", userProfile.getId());
+        profileDTO.put("country", userProfile.getCountry());
+        profileDTO.put("firstLanguage", userProfile.getFirstLanguage());
+        profileDTO.put("profilePicture", userProfile.getProfilePicture());
+        profileDTO.put("reasonToLearn", userProfile.getReasonToLearn());
+        profileDTO.put("dailyReminders", userProfile.isDailyReminders());
+        profileDTO.put("dailyGoalMinutes", userProfile.getDailyGoalMinutes());
+        profileDTO.put("preferredLearningTime", userProfile.getPreferredLearningTime());
+        
+        // Add user data
+        Map<String, Object> userData = new HashMap<>();
+        if (userProfile.getUser() != null) {
+            userData.put("firstName", userProfile.getUser().getFirstName());
+            userData.put("lastName", userProfile.getUser().getLastName());
+            userData.put("email", userProfile.getUser().getEmail());
+            userData.put("id", userProfile.getUser().getId());
+        }
+        profileDTO.put("user", userData);
+        
+        dashboardData.put("userProfile", profileDTO);
         dashboardData.put("learningStats", learningStats);
-        dashboardData.put("recommendedCourses", recommendedCourses);
+        
+        // Convert recommended courses to DTOs to avoid circular references
+        List<Map<String, Object>> recommendedCourseDTOs = new ArrayList<>();
+        for (Course course : recommendedCourses) {
+            Map<String, Object> courseDTO = new HashMap<>();
+            courseDTO.put("id", course.getId());
+            courseDTO.put("title", course.getTitle());
+            courseDTO.put("description", course.getDescription());
+            courseDTO.put("level", course.getLevel());
+            courseDTO.put("image", course.getImage());
+            
+            // Add language info without circular reference
+            if (course.getLanguage() != null) {
+                Map<String, Object> languageDTO = new HashMap<>();
+                languageDTO.put("id", course.getLanguage().getId());
+                languageDTO.put("name", course.getLanguage().getName());
+                languageDTO.put("code", course.getLanguage().getCode());
+                courseDTO.put("language", languageDTO);
+            }
+            
+            recommendedCourseDTOs.add(courseDTO);
+        }
+        dashboardData.put("recommendedCourses", recommendedCourseDTOs);
         dashboardData.put("courseProgress", courseProgress);
         
         return dashboardData;

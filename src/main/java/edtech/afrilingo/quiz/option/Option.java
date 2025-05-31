@@ -1,6 +1,7 @@
 package edtech.afrilingo.quiz.option;
 
 import edtech.afrilingo.question.Question;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,5 +25,6 @@ public class Option {
 
     @ManyToOne
     @JoinColumn(name = "question_id")
+    @JsonIgnoreProperties("options")
     private Question question;
 }

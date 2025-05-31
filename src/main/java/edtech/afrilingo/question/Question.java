@@ -2,6 +2,7 @@ package edtech.afrilingo.question;
 
 import edtech.afrilingo.quiz.option.Option;
 import edtech.afrilingo.quiz.Quiz;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,8 +32,10 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
+    @JsonIgnoreProperties("questions")
     private Quiz quiz;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("question")
     private List<Option> options;
 }

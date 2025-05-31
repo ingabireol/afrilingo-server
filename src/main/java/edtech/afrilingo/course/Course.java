@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
@@ -48,9 +48,10 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "language_id")
-    @JsonBackReference
+    @JsonIgnoreProperties("courses")
     private Language language;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("course")
     private List<Lesson> lessons;
 }

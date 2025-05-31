@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/courses/**").permitAll()
                         .requestMatchers("/api/v1/lessons/**").permitAll()
                         .requestMatchers("/api/v1/profile/**").permitAll()
+                        .requestMatchers("/api/admin/data-loader/**").permitAll()
                         // Error endpoints
                         .requestMatchers("/error").permitAll()
                         // All other endpoints require authentication

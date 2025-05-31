@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/data-loader")
@@ -19,6 +21,31 @@ import java.util.Comparator;
 public class DataLoaderController {
     
     private final DataLoaderService dataLoaderService;
+    private final DataHealthService dataHealthService;
+    
+    @Operation(
+            summary = "Check data health",
+            description = "Checks the integrity and completeness of all data in the system",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @GetMapping("/health-check")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> checkDataHealth() {
+        Map<String, Object> healthStatus = dataHealthService.checkDataIntegrity();
+        return ResponseEntity.ok(ApiResponse.success(healthStatus));
+    }
+    
+    @Operation(
+            summary = "Repair data",
+            description = "Automatically repairs any data inconsistencies found in the system",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/repair-data")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> repairData() {
+        Map<String, Object> repairResults = dataHealthService.repairData();
+        return ResponseEntity.ok(ApiResponse.success(repairResults));
+    }
     
     @Operation(
             summary = "Load all data",
@@ -26,7 +53,7 @@ public class DataLoaderController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/load-all")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse<String>> loadAllData() {
         dataLoaderService.loadAllData();
         return ResponseEntity.ok(ApiResponse.success("All data loaded successfully"));
@@ -38,7 +65,7 @@ public class DataLoaderController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/load-languages")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse<String>> loadLanguages() {
         dataLoaderService.loadLanguages();
         return ResponseEntity.ok(ApiResponse.success("Languages loaded successfully"));
@@ -50,7 +77,7 @@ public class DataLoaderController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/load-courses")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse<String>> loadCourses() {
         dataLoaderService.loadCourses();
         return ResponseEntity.ok(ApiResponse.success("Courses loaded successfully"));
@@ -62,7 +89,7 @@ public class DataLoaderController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/load-lessons")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse<String>> loadLessons() {
         dataLoaderService.loadLessons();
         return ResponseEntity.ok(ApiResponse.success("Lessons loaded successfully"));
@@ -74,7 +101,7 @@ public class DataLoaderController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/load-lesson-content")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse<String>> loadLessonContent() {
         dataLoaderService.loadLessonContent();
         return ResponseEntity.ok(ApiResponse.success("Lesson content loaded successfully"));
@@ -86,7 +113,7 @@ public class DataLoaderController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/load-quizzes")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse<String>> loadQuizzes() {
         dataLoaderService.loadQuizzes();
         return ResponseEntity.ok(ApiResponse.success("Quizzes loaded successfully"));
@@ -98,7 +125,7 @@ public class DataLoaderController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/load-users")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse<String>> loadUsers() {
         dataLoaderService.loadUsers();
         return ResponseEntity.ok(ApiResponse.success("Sample users loaded successfully"));
@@ -110,7 +137,7 @@ public class DataLoaderController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @DeleteMapping("/reset")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse<String>> resetData() {
         dataLoaderService.resetAllData();
         return ResponseEntity.ok(ApiResponse.success("All data reset successfully"));
