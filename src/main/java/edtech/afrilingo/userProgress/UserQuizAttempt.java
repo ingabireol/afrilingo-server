@@ -1,5 +1,6 @@
 package edtech.afrilingo.userProgress;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import edtech.afrilingo.quiz.Quiz;
 import edtech.afrilingo.user.User;
 import jakarta.persistence.*;
@@ -27,12 +28,15 @@ public class UserQuizAttempt {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"profile", "authorities", "password"})
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
+    @JsonIgnoreProperties({"questions", "lesson"})
     private Quiz quiz;
 
     @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("attempt")
     private List<UserAnswer> answers;
 }
