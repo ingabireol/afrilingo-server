@@ -1,7 +1,7 @@
 package edtech.afrilingo.userProgress;
 
 import edtech.afrilingo.dto.ApiResponse;
-import edtech.afrilingo.profile.ProfileSetupController;
+import edtech.afrilingo.profile.UserDashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.Map;
 @Tag(name = "User Dashboard", description = "Endpoints for user dashboard data")
 public class UserDashboardController {
 
-    private final ProfileSetupController.UserDashboardService userDashboardService;
+    private final UserDashboardService userDashboardService;
 
     @Operation(summary = "Get user dashboard data", description = "Returns comprehensive data for the user dashboard")
     @GetMapping

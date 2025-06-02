@@ -1,5 +1,6 @@
 package edtech.afrilingo.userProgress;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import edtech.afrilingo.question.Question;
 import edtech.afrilingo.quiz.option.Option;
 import jakarta.persistence.*;
@@ -23,13 +24,16 @@ public class UserAnswer {
 
     @ManyToOne
     @JoinColumn(name = "attempt_id")
+    @JsonIgnoreProperties({"answers", "user", "quiz"})
     private UserQuizAttempt attempt;
 
     @ManyToOne
     @JoinColumn(name = "question_id")
+    @JsonIgnoreProperties({"options", "quiz"})
     private Question question;
 
     @ManyToOne
     @JoinColumn(name = "option_id")
+    @JsonIgnoreProperties({"question"})
     private Option option;
 }

@@ -1,5 +1,6 @@
 package edtech.afrilingo.userProgress;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import edtech.afrilingo.lesson.Lesson;
 import edtech.afrilingo.user.User;
 import jakarta.persistence.*;
@@ -27,10 +28,11 @@ public class UserProgress {
     
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"profile", "authorities", "password"})
     private User user;
     
     @ManyToOne
     @JoinColumn(name = "lesson_id")
+    @JsonIgnoreProperties({"contents", "quizzes", "course"})
     private Lesson lesson;
 }
-
