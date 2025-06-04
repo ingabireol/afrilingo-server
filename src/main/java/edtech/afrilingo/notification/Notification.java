@@ -1,5 +1,6 @@
 package edtech.afrilingo.notification;
 
+import edtech.afrilingo.notification.NotificationType;
 import edtech.afrilingo.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -39,4 +40,16 @@ public class Notification {
 
     // Optional field to store the ID of the related entity (e.g., course, lesson, quiz)
     private Long relatedEntityId;
-} 
+
+    // Enhanced fields for Flutter integration
+    private LocalDateTime snoozedUntil;
+
+    @Column(nullable = false)
+    private boolean snoozed = false;
+
+    @Column(nullable = false)
+    private int priority = 2; // 1 = low, 2 = normal, 3 = high
+
+    private String actionUrl; // Deep link URL for Flutter app
+    private String imageUrl; // Optional image for rich notifications
+}

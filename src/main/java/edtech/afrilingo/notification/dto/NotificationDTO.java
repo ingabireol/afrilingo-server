@@ -20,4 +20,11 @@ public class NotificationDTO {
     private boolean read;
     private NotificationType type;
     private Long relatedEntityId;
-} 
+
+    // Enhanced fields for Flutter integration
+    private boolean snoozed;
+    private LocalDateTime snoozedUntil;
+    private int priority;
+    private String actionUrl;
+    private String imageUrl;
+}
