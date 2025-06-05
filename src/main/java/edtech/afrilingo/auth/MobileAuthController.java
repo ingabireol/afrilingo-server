@@ -3,7 +3,7 @@ package edtech.afrilingo.auth;
 import edtech.afrilingo.config.JwtService;
 import edtech.afrilingo.dto.GoogleTokenRequest;
 import edtech.afrilingo.dto.GoogleUser;
-import edtech.afrilingo.service.GoogleTokenVerificationService;
+import edtech.afrilingo.auth.GoogleTokenVerificationService;
 import edtech.afrilingo.user.Role;
 import edtech.afrilingo.user.User;
 import edtech.afrilingo.user.UserRepository;
