@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoogleTokenRequest {
-    private String idToken;
-    private String platform; // "android" or "ios"
+public class GoogleUser {
+    private String email;
+    private String firstName;
+    private String lastName;
+    private String picture;
+    private Boolean emailVerified;
 }
