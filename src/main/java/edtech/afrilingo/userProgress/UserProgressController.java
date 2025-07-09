@@ -14,10 +14,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/progress")
@@ -160,29 +163,50 @@ public class UserProgressController {
      * @return Streak count
      */
     private int calculateStreak(List<UserProgress> allUserProgress, List<UserQuizAttempt> allQuizAttempts) {
-        // Implementation similar to UserDashboardService.calculateStreak
-        // This is a simplified version for demonstration
+        // Combine all completion dates and attempt dates
+        List<LocalDateTime> activityDates = new ArrayList<>();
         
-        if (allUserProgress.isEmpty() && allQuizAttempts.isEmpty()) {
+        allUserProgress.stream()
+                .filter(p -> p.getCompletedAt() != null)
+                .map(UserProgress::getCompletedAt)
+                .forEach(activityDates::add);
+        
+        allQuizAttempts.stream()
+                .map(UserQuizAttempt::getAttemptedAt)
+                .forEach(activityDates::add);
+        
+        if (activityDates.isEmpty()) {
             return 0;
         }
         
-        // Count distinct days with activity in the last 30 days
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime thirtyDaysAgo = now.minusDays(30);
+        // Sort dates in descending order (newest first)
+        activityDates.sort((d1, d2) -> d2.compareTo(d1));
         
-        long distinctDays = allUserProgress.stream()
-                .filter(p -> p.getCompletedAt() != null && p.getCompletedAt().isAfter(thirtyDaysAgo))
-                .map(p -> p.getCompletedAt().toLocalDate())
-                .distinct()
-                .count();
+        // Group by date (ignoring time)
+        Map<LocalDateTime, List<LocalDateTime>> dateGroups = activityDates.stream()
+                .collect(Collectors.groupingBy(date -> 
+                    date.truncatedTo(ChronoUnit.DAYS)));
         
-        distinctDays += allQuizAttempts.stream()
-                .filter(a -> a.getAttemptedAt() != null && a.getAttemptedAt().isAfter(thirtyDaysAgo))
-                .map(a -> a.getAttemptedAt().toLocalDate())
-                .distinct()
-                .count();
+        // Convert to sorted list of distinct days
+        List<LocalDateTime> distinctDays = new ArrayList<>(dateGroups.keySet());
+        distinctDays.sort((d1, d2) -> d2.compareTo(d1));
         
-        return (int) Math.min(distinctDays, 30); // Cap at 30 days
+        // Calculate streak
+        int streak = 1;
+        LocalDateTime currentDay = distinctDays.get(0);
+        
+        for (int i = 1; i < distinctDays.size(); i++) {
+            LocalDateTime nextDay = distinctDays.get(i);
+            
+            // Check if dates are consecutive
+            if (ChronoUnit.DAYS.between(nextDay, currentDay) == 1) {
+                streak++;
+                currentDay = nextDay;
+            } else {
+                break;
+            }
+        }
+        
+        return streak;
     }
 }
