@@ -24,6 +24,7 @@ public class UserProfile {
 
     private String country;
     private String firstLanguage;
+
     private String profilePicture;
     
     @Column(name = "learning_reason")

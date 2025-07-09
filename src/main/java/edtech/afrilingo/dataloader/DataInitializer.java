@@ -20,13 +20,13 @@ public class DataInitializer implements CommandLineRunner {
 
     private final DataLoaderService dataLoaderService;
     private final DataHealthService dataHealthService;
-    
+
     @Value("${afrilingo.data.auto-load:true}")
     private boolean autoLoadData;
-    
+
     @Value("${afrilingo.data.reset-on-startup:false}")
     private boolean resetDataOnStartup;
-    
+
     @Value("${afrilingo.data.auto-repair:true}")
     private boolean autoRepairData;
 
@@ -36,13 +36,13 @@ public class DataInitializer implements CommandLineRunner {
             log.info("Automatic data loading is disabled. Set afrilingo.data.auto-load=true to enable.");
             return;
         }
-        
+
         log.info("Starting data initialization process...");
         try {
             if (resetDataOnStartup) {
                 log.info("Resetting all existing data as per configuration...");
                 dataLoaderService.resetAllData();
-                
+
                 // After reset, we always need to load data
                 log.info("Loading application data after reset...");
                 dataLoaderService.loadAllData();
@@ -51,10 +51,10 @@ public class DataInitializer implements CommandLineRunner {
                 log.info("Checking data integrity...");
                 Map<String, Object> healthStatus = dataHealthService.checkDataIntegrity();
                 boolean isHealthy = (boolean) healthStatus.get("overallHealth");
-                
+
                 if (!isHealthy) {
                     log.warn("Data integrity issues detected!");
-                    
+
                     if (autoRepairData) {
                         log.info("Auto-repairing data...");
                         Map<String, Object> repairResults = dataHealthService.repairData();
@@ -69,7 +69,7 @@ public class DataInitializer implements CommandLineRunner {
                     log.info("Data integrity check passed. No issues detected.");
                 }
             }
-            
+
             log.info("Data initialization completed successfully");
         } catch (Exception e) {
             log.error("Error during data initialization: {}", e.getMessage(), e);

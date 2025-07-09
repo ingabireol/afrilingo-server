@@ -575,7 +575,7 @@ public class DataLoaderService {
                 if (myNameIs != null) {
                     content.append("* **").append(myNameIs).append("** - Introducing yourself\n");
                 }
-                
+
                 if (languageCode.equals("RW")) {
                     content.append("* **Nkomoka...** - I come from...\n");
                     content.append("* **Ni byiza kuguhura** - Nice to meet you\n");
@@ -1138,7 +1138,7 @@ public class DataLoaderService {
             questions.add(q1);
             questions.add(q2);
             questions.add(q3);
-            
+
             return questions;
         }
 
@@ -1212,7 +1212,7 @@ public class DataLoaderService {
             questions.add(q1);
             questions.add(q2);
             questions.add(q3);
-            
+
             return questions;
         }
 
@@ -1286,7 +1286,7 @@ public class DataLoaderService {
             questions.add(q1);
             questions.add(q2);
             questions.add(q3);
-            
+
             return questions;
         }
 
@@ -1360,7 +1360,7 @@ public class DataLoaderService {
             questions.add(q1);
             questions.add(q2);
             questions.add(q3);
-            
+
             return questions;
         }
 
@@ -1437,7 +1437,7 @@ public class DataLoaderService {
             questions.add(q1);
             questions.add(q2);
             questions.add(q3);
-            
+
             return questions;
         }
 
@@ -1506,7 +1506,7 @@ public class DataLoaderService {
             questions.add(q1);
             questions.add(q2);
             questions.add(q3);
-            
+
             return questions;
         }
 
@@ -1822,7 +1822,7 @@ public class DataLoaderService {
             int dailyGoalMinutes,
             String preferredLearningTime,
             List<String> languageCodes) {
-        
+
         // Create user
         RegisterRequest request = RegisterRequest.builder()
                 .firstname(firstName)
@@ -1834,16 +1834,16 @@ public class DataLoaderService {
 
         // Register user (this will save the user)
         authenticationService.register(request);
-        
+
         // Get the created user
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Failed to find created user: " + email));
-        
+
         // Create and save user profile
-        createUserProfile(user, country, firstLanguage, reasonToLearn, 
-                profilePicture, dailyReminders, dailyGoalMinutes, 
+        createUserProfile(user, country, firstLanguage, reasonToLearn,
+                profilePicture, dailyReminders, dailyGoalMinutes,
                 preferredLearningTime, languageCodes);
-        
+
         return user;
     }
 
@@ -1861,7 +1861,7 @@ public class DataLoaderService {
             int dailyGoalMinutes,
             String preferredLearningTime,
             List<String> languageCodes) {
-        
+
         // Check if profile already exists
         // Use user.getId() with findByUserId
         if (userProfileRepository.findByUserId(user.getId()).isPresent()) {
