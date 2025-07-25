@@ -5,7 +5,9 @@ import edtech.afrilingo.quiz.QuizRepository;
 import edtech.afrilingo.quiz.option.Option;
 import edtech.afrilingo.quiz.option.OptionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuestionServiceImpl implements QuestionService {
 
     private final QuestionRepository questionRepository;
@@ -110,6 +114,15 @@ public class QuestionServiceImpl implements QuestionService {
                                 .orElseThrow(() -> new IllegalArgumentException("Quiz not found"));
 
                         existingQuestion.setQuiz(quiz);
+                    }
+
+                    // Update certification fields
+                    if (questionDetails.getCertificationQuestion() != null) {
+                        existingQuestion.setCertificationQuestion(questionDetails.getCertificationQuestion());
+                    }
+
+                    if (questionDetails.getCertificationLevel() != null) {
+                        existingQuestion.setCertificationLevel(questionDetails.getCertificationLevel());
                     }
 
                     return questionRepository.save(existingQuestion);
@@ -231,10 +244,155 @@ public class QuestionServiceImpl implements QuestionService {
         return questionRepository.findByQuestionTextContaining(keyword);
     }
 
+    // ==================== UPDATED CERTIFICATION METHODS ====================
+
+    /**
+     * Get certification questions with multiple fallback strategies
+     * Updated to work with the corrected repository methods
+     */
+    public List<Question> getCertificationQuestions(String languageCode, String testLevel, int count) {
+        try {
+            log.info("Getting certification questions for language: {} level: {} count: {}",
+                    languageCode, testLevel, count);
+
+            List<Question> questions = new ArrayList<>();
+
+            // Strategy 1: Try to get certification questions by quiz title containing language name
+            if (languageCode != null) {
+                try {
+                    String languageName = getLanguageDisplayName(languageCode);
+                    questions = questionRepository.findQuestionsByQuizTitleContainingAndLevel(
+                            languageName, testLevel, PageRequest.of(0, count));
+                    log.info("Found {} questions using quiz title strategy for {}", questions.size(), languageName);
+                } catch (Exception e) {
+                    log.warn("Quiz title-based query failed: {}", e.getMessage());
+                }
+            }
+
+            // Strategy 2: If not enough questions, try by certification level only
+            if (questions.size() < count) {
+                try {
+                    List<Question> levelQuestions = questionRepository.findCertificationQuestionsByLevel(
+                            testLevel, PageRequest.of(0, count - questions.size()));
+                    questions.addAll(levelQuestions);
+                    log.info("Added {} questions using certification level strategy", levelQuestions.size());
+                } catch (Exception e) {
+                    log.warn("Certification level query failed: {}", e.getMessage());
+                }
+            }
+
+            // Strategy 3: Get any certification questions regardless of level
+            if (questions.size() < count) {
+                try {
+                    List<Question> certQuestions = questionRepository.findAllCertificationQuestions(
+                            PageRequest.of(0, count - questions.size()));
+                    questions.addAll(certQuestions);
+                    log.info("Added {} questions using all certification questions strategy", certQuestions.size());
+                } catch (Exception e) {
+                    log.warn("All certification questions query failed: {}", e.getMessage());
+                }
+            }
+
+            // Strategy 4: Fallback to random questions from any quiz
+            if (questions.size() < count) {
+                try {
+                    List<Question> randomQuestions = questionRepository.findRandomQuestions(
+                            PageRequest.of(0, count - questions.size()));
+                    questions.addAll(randomQuestions);
+                    log.info("Added {} questions using random strategy", randomQuestions.size());
+                } catch (Exception e) {
+                    log.warn("Random questions query failed: {}", e.getMessage());
+                }
+            }
+
+            // Remove duplicates and limit to requested count
+            List<Question> uniqueQuestions = questions.stream()
+                    .distinct()
+                    .limit(count)
+                    .collect(Collectors.toList());
+
+            log.info("Returning {} unique questions for certification", uniqueQuestions.size());
+            return uniqueQuestions;
+
+        } catch (Exception e) {
+            log.error("Error getting certification questions: {}", e.getMessage(), e);
+
+            // Ultimate fallback - get any questions from database
+            try {
+                List<Question> fallbackQuestions = questionRepository.findAll()
+                        .stream()
+                        .limit(count)
+                        .collect(Collectors.toList());
+                log.info("Using ultimate fallback, returning {} questions", fallbackQuestions.size());
+                return fallbackQuestions;
+            } catch (Exception fallbackError) {
+                log.error("Even fallback failed: {}", fallbackError.getMessage());
+                return new ArrayList<>();
+            }
+        }
+    }
+
+    /**
+     * Check if answer is correct
+     */
+    public boolean isAnswerCorrect(Long questionId, Long selectedOptionId) {
+        try {
+            Optional<Question> questionOpt = questionRepository.findById(questionId);
+            if (questionOpt.isEmpty()) {
+                log.warn("Question not found: {}", questionId);
+                return false;
+            }
+
+            Optional<Option> selectedOption = optionRepository.findById(selectedOptionId);
+            if (selectedOption.isEmpty()) {
+                log.warn("Option not found: {}", selectedOptionId);
+                return false;
+            }
+
+            boolean isCorrect = selectedOption.get().isCorrect();
+            log.debug("Question {} option {} is correct: {}", questionId, selectedOptionId, isCorrect);
+
+            return isCorrect;
+
+        } catch (Exception e) {
+            log.error("Error checking answer correctness: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get correct answer for a question
+     */
+    public Optional<Option> getCorrectAnswer(Long questionId) {
+        try {
+            return optionRepository.findByQuestionIdAndCorrectTrue(questionId);
+        } catch (Exception e) {
+            log.error("Error getting correct answer for question {}: {}", questionId, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Helper method to get language display name from language code
+     */
+    private String getLanguageDisplayName(String languageCode) {
+        if (languageCode == null) return "";
+
+        switch (languageCode.toLowerCase()) {
+            case "rw": case "kin": return "Kinyarwanda";
+            case "sw": case "swa": return "Swahili";
+            case "am": case "amh": return "Amharic";
+            case "ha": case "hau": return "Hausa";
+            case "yo": case "yor": return "Yoruba";
+            case "ig": case "ibo": return "Igbo";
+            case "zu": case "zul": return "Zulu";
+            case "af": case "afr": return "Afrikaans";
+            default: return languageCode.toUpperCase();
+        }
+    }
+
     /**
      * Helper method to validate options based on question type
-     *
-     * @param question Question to validate
      */
     private void validateOptionsForQuestionType(Question question) {
         // Skip validation if options are not yet set
@@ -276,6 +434,67 @@ public class QuestionServiceImpl implements QuestionService {
                     throw new IllegalArgumentException("Fill in the blank questions must have at least 1 correct option");
                 }
                 break;
+        }
+    }
+
+    // ==================== NEW CERTIFICATION HELPER METHODS ====================
+
+    /**
+     * Get questions from specific quiz IDs (useful for language-specific quizzes)
+     */
+    public List<Question> getQuestionsFromSpecificQuizzes(List<Long> quizIds, String testLevel, int count) {
+        try {
+            return questionRepository.findCertificationQuestionsByQuizIdsAndLevel(
+                    quizIds, testLevel, PageRequest.of(0, count));
+        } catch (Exception e) {
+            log.error("Error getting questions from specific quizzes: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Count available certification questions by level
+     */
+    public long countCertificationQuestionsByLevel(String testLevel) {
+        try {
+            return questionRepository.countCertificationQuestionsByLevel(testLevel);
+        } catch (Exception e) {
+            log.error("Error counting certification questions: {}", e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Count all certification questions
+     */
+    public long countAllCertificationQuestions() {
+        try {
+            return questionRepository.countAllCertificationQuestions();
+        } catch (Exception e) {
+            log.error("Error counting all certification questions: {}", e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Mark questions as certification questions (admin function)
+     */
+    @Transactional
+    public void markQuestionsAsCertification(List<Long> questionIds, String certificationLevel) {
+        try {
+            for (Long questionId : questionIds) {
+                Optional<Question> questionOpt = questionRepository.findById(questionId);
+                if (questionOpt.isPresent()) {
+                    Question question = questionOpt.get();
+                    question.setCertificationQuestion(true);
+                    question.setCertificationLevel(certificationLevel);
+                    questionRepository.save(question);
+                }
+            }
+            log.info("Marked {} questions as certification level {}", questionIds.size(), certificationLevel);
+        } catch (Exception e) {
+            log.error("Error marking questions as certification: {}", e.getMessage());
+            throw new RuntimeException("Failed to mark questions as certification", e);
         }
     }
 }

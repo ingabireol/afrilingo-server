@@ -1,8 +1,8 @@
 package edtech.afrilingo.question;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import edtech.afrilingo.quiz.option.Option;
 import edtech.afrilingo.quiz.Quiz;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,4 +38,9 @@ public class Question {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("question")
     private List<Option> options;
+    @Column(name = "certification_question")
+    private Boolean certificationQuestion;
+
+    @Column(name = "certification_level")
+    private String certificationLevel;
 }
