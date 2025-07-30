@@ -222,16 +222,19 @@ public class CertificationService {
         return "AFL-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
     }
     public List<Certificate> getUserCertificates(User user) {
-        try {
-            return certificateRepository.findByUserOrderByIssuedAtDesc(user);
-        } catch (Exception e) {
-            log.error("Error getting certificates for user {}: {}", user.getId(), e.getMessage());
-            throw new RuntimeException("Failed to retrieve user certificates", e);
-        }
+        return certificateRepository.findByUserOrderByIssuedAtDesc(user);
     }
-    public Certificate verifyCertificate(String certificateId) {
+    
+    public Certificate getCertificateById(String certificateId) {
         return certificateRepository.findByCertificateId(certificateId)
                 .orElseThrow(() -> new RuntimeException("Certificate not found"));
+    }
+    
+    @Transactional
+    public void clearOngoingSessions() {
+        List<CertificationSession> ongoingSessions = sessionRepository.findByCompletedFalse();
+        sessionRepository.deleteAll(ongoingSessions);
+        log.info("Cleared {} ongoing certification sessions", ongoingSessions.size());
     }
 
 }

@@ -25,4 +25,6 @@ public interface CertificationSessionRepository extends JpaRepository<Certificat
     
     @Query("SELECT s FROM CertificationSession s WHERE s.suspiciousActivityCount > :threshold")
     List<CertificationSession> findSessionsWithSuspiciousActivity(int threshold);
+    
+    List<CertificationSession> findByCompletedFalse();
 }

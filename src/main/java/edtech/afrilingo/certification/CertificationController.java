@@ -134,11 +134,23 @@ public class CertificationController {
     @GetMapping("/certificates/{certificateId}/verify")
     public ResponseEntity<ApiResponse<Certificate>> verifyCertificate(@PathVariable String certificateId) {
         try {
-            Certificate certificate = certificationService.verifyCertificate(certificateId);
-            return ResponseEntity.ok(ApiResponse.success(certificate, "Certificate verified"));
+            Certificate certificate = certificationService.getCertificateById(certificateId);
+            return ResponseEntity.ok(ApiResponse.success(certificate));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(400, "Certificate not found or invalid"));
+                    .body(ApiResponse.error(400, e.getMessage()));
+        }
+    }
+    
+    @Operation(summary = "Clear ongoing sessions", description = "Clear ongoing certification sessions for testing (ADMIN only)")
+    @DeleteMapping("/sessions/clear")
+    public ResponseEntity<ApiResponse<String>> clearOngoingSessions() {
+        try {
+            certificationService.clearOngoingSessions();
+            return ResponseEntity.ok(ApiResponse.success("All ongoing sessions cleared successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(400, e.getMessage()));
         }
     }
 }

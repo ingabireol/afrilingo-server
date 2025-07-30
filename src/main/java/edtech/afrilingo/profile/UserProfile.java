@@ -1,6 +1,7 @@
 package edtech.afrilingo.profile;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import edtech.afrilingo.language.Language;
 import edtech.afrilingo.user.User;
 import jakarta.persistence.*;
@@ -37,6 +38,7 @@ public class UserProfile {
         joinColumns = @JoinColumn(name = "profile_id"),
         inverseJoinColumns = @JoinColumn(name = "language_id")
     )
+    @JsonIgnore
     private List<Language> languagesToLearn;
     
     // Learning preferences
