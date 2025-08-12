@@ -1,5 +1,6 @@
 package edtech.afrilingo.certification;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import edtech.afrilingo.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,7 @@ public class CertificationSession {
     
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore  // Prevent circular reference
     private User user;
     
     @OneToOne
@@ -50,8 +52,10 @@ public class CertificationSession {
     private Certificate certificate;
     
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
+    @JsonIgnore  // Prevent circular reference and deep nesting
     private List<ProctorEvent> proctorEvents;
     
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
+    @JsonIgnore  // Prevent circular reference and deep nesting
     private List<CertificationQuestionResponse> responses;
 }

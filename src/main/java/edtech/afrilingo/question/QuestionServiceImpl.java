@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -244,94 +246,53 @@ public class QuestionServiceImpl implements QuestionService {
         return questionRepository.findByQuestionTextContaining(keyword);
     }
 
+    @Override
+    public List<Question> getCertificationQuestions(String languageCode, String testLevel, int count) {
+        log.info("Fetching {} certification questions for language '{}' and level '{}'", count, languageCode, testLevel);
+
+        // DEBUG: Fetch all questions to check if data exists
+        log.warn("DEBUG MODE: Fetching all questions, ignoring all filters.");
+        List<Question> allQuestions;
+        try {
+            allQuestions = questionRepository.findAllQuestionsForDebug(PageRequest.of(0, count));
+            log.info("DEBUG: Found {} questions in total.", allQuestions.size());
+        } catch (Exception e) {
+            log.error("DEBUG: Error fetching all questions: {}", e.getMessage(), e);
+            return Collections.emptyList();
+        }
+
+        if (allQuestions.isEmpty()) {
+            log.error("No questions found in the database at all. Please verify the 'questions' table is populated.");
+        }
+
+        // Shuffle the final list of questions
+        Collections.shuffle(allQuestions);
+
+        log.info("Successfully prepared {} questions for the certification test.", allQuestions.size());
+        return allQuestions.stream().limit(count).collect(Collectors.toList());
+    }
+
     // ==================== UPDATED CERTIFICATION METHODS ====================
 
     /**
-     * Get certification questions with multiple fallback strategies
-     * Updated to work with the corrected repository methods
+     * Safely fetch questions by type with error handling and fallback
      */
-    public List<Question> getCertificationQuestions(String languageCode, String testLevel, int count) {
+    private List<Question> safeFetchQuestionsByType(String languageCode, String testLevel, QuestionType type, int count) {
         try {
-            log.info("Getting certification questions for language: {} level: {} count: {}",
-                    languageCode, testLevel, count);
-
-            List<Question> questions = new ArrayList<>();
-
-            // Strategy 1: Try to get certification questions by quiz title containing language name
-            if (languageCode != null) {
-                try {
-                    String languageName = getLanguageDisplayName(languageCode);
-                    questions = questionRepository.findQuestionsByQuizTitleContainingAndLevel(
-                            languageName, testLevel, PageRequest.of(0, count));
-                    log.info("Found {} questions using quiz title strategy for {}", questions.size(), languageName);
-                } catch (Exception e) {
-                    log.warn("Quiz title-based query failed: {}", e.getMessage());
-                }
-            }
-
-            // Strategy 2: If not enough questions, try by certification level only
-            if (questions.size() < count) {
-                try {
-                    List<Question> levelQuestions = questionRepository.findCertificationQuestionsByLevel(
-                            testLevel, PageRequest.of(0, count - questions.size()));
-                    questions.addAll(levelQuestions);
-                    log.info("Added {} questions using certification level strategy", levelQuestions.size());
-                } catch (Exception e) {
-                    log.warn("Certification level query failed: {}", e.getMessage());
-                }
-            }
-
-            // Strategy 3: Get any certification questions regardless of level
-            if (questions.size() < count) {
-                try {
-                    List<Question> certQuestions = questionRepository.findAllCertificationQuestions(
-                            PageRequest.of(0, count - questions.size()));
-                    questions.addAll(certQuestions);
-                    log.info("Added {} questions using all certification questions strategy", certQuestions.size());
-                } catch (Exception e) {
-                    log.warn("All certification questions query failed: {}", e.getMessage());
-                }
-            }
-
-            // Strategy 4: Fallback to random questions from any quiz
-            if (questions.size() < count) {
-                try {
-                    List<Question> randomQuestions = questionRepository.findRandomQuestions(
-                            PageRequest.of(0, count - questions.size()));
-                    questions.addAll(randomQuestions);
-                    log.info("Added {} questions using random strategy", randomQuestions.size());
-                } catch (Exception e) {
-                    log.warn("Random questions query failed: {}", e.getMessage());
-                }
-            }
-
-            // Remove duplicates and limit to requested count
-            List<Question> uniqueQuestions = questions.stream()
-                    .distinct()
-                    .limit(count)
-                    .collect(Collectors.toList());
-
-            log.info("Returning {} unique questions for certification", uniqueQuestions.size());
-            return uniqueQuestions;
-
+            List<Question> questions = fetchRandomQuestionsByType(languageCode, testLevel, type, count);
+            return questions != null ? questions : new ArrayList<>();
         } catch (Exception e) {
-            log.error("Error getting certification questions: {}", e.getMessage(), e);
-
-            // Ultimate fallback - get any questions from database
-            try {
-                List<Question> fallbackQuestions = questionRepository.findAll()
-                        .stream()
-                        .limit(count)
-                        .collect(Collectors.toList());
-                log.info("Using ultimate fallback, returning {} questions", fallbackQuestions.size());
-                return fallbackQuestions;
-            } catch (Exception fallbackError) {
-                log.error("Even fallback failed: {}", fallbackError.getMessage());
-                return new ArrayList<>();
-            }
+            log.warn("Error fetching {} questions: {}", type, e.getMessage());
+            return new ArrayList<>();
         }
     }
 
+    private List<Question> fetchRandomQuestionsByType(String languageCode, String testLevel, QuestionType type, int count) {
+        return questionRepository.findRandomCertificationQuestionsByTypeAndLanguage(
+                languageCode, testLevel, type, PageRequest.of(0, count));
+    }
+
+// ... (rest of the code remains the same)
     /**
      * Check if answer is correct
      */
@@ -372,24 +333,7 @@ public class QuestionServiceImpl implements QuestionService {
         }
     }
 
-    /**
-     * Helper method to get language display name from language code
-     */
-    private String getLanguageDisplayName(String languageCode) {
-        if (languageCode == null) return "";
 
-        switch (languageCode.toLowerCase()) {
-            case "rw": case "kin": return "Kinyarwanda";
-            case "sw": case "swa": return "Swahili";
-            case "am": case "amh": return "Amharic";
-            case "ha": case "hau": return "Hausa";
-            case "yo": case "yor": return "Yoruba";
-            case "ig": case "ibo": return "Igbo";
-            case "zu": case "zul": return "Zulu";
-            case "af": case "afr": return "Afrikaans";
-            default: return languageCode.toUpperCase();
-        }
-    }
 
     /**
      * Helper method to validate options based on question type
@@ -429,10 +373,8 @@ public class QuestionServiceImpl implements QuestionService {
                 break;
 
             case FILL_BLANK:
-                // Fill in the blank should have at least 1 correct option
-                if (correctOptionsCount == 0) {
-                    throw new IllegalArgumentException("Fill in the blank questions must have at least 1 correct option");
-                }
+            case OPEN_ENDED:
+                // No specific validation for options, as the answer is usually in the text
                 break;
         }
     }

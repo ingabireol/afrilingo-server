@@ -33,7 +33,11 @@ public class DataHealthService {
     private final QuestionRepository questionRepository;
     private final OptionRepository optionRepository;
     private final UserRepository userRepository;
-    private final DataLoaderService dataLoaderService;
+    private final org.springframework.context.ApplicationContext applicationContext;
+
+    private DataLoaderService getDataLoaderService() {
+        return applicationContext.getBean(DataLoaderService.class);
+    }
 
     /**
      * Checks the integrity of all data in the system.
@@ -74,34 +78,34 @@ public class DataHealthService {
         
         // Only repair categories that are not healthy
         if (!isHealthy(healthStatus, "languages")) {
-            dataLoaderService.loadLanguages();
+            getDataLoaderService().loadLanguages();
             repairResults.put("languages", "repaired");
         }
         
         if (!isHealthy(healthStatus, "courses")) {
-            dataLoaderService.loadCourses();
+            getDataLoaderService().loadCourses();
             repairResults.put("courses", "repaired");
         }
         
         if (!isHealthy(healthStatus, "lessons")) {
-            dataLoaderService.loadLessons();
+            getDataLoaderService().loadLessons();
             repairResults.put("lessons", "repaired");
         }
         
         if (!isHealthy(healthStatus, "lessonContents")) {
-            dataLoaderService.loadLessonContent();
+            getDataLoaderService().loadLessonContent();
             repairResults.put("lessonContents", "repaired");
         }
         
         if (!isHealthy(healthStatus, "quizzes") || !isHealthy(healthStatus, "questions") || !isHealthy(healthStatus, "options")) {
-            dataLoaderService.loadQuizzes();
+            getDataLoaderService().loadQuizzes();
             repairResults.put("quizzes", "repaired");
             repairResults.put("questions", "repaired");
             repairResults.put("options", "repaired");
         }
         
         if (!isHealthy(healthStatus, "users")) {
-            dataLoaderService.loadUsers();
+            getDataLoaderService().loadUsers();
             repairResults.put("users", "repaired");
         }
         

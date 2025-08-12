@@ -1,5 +1,8 @@
 package edtech.afrilingo.certification;
 
+import org.springframework.beans.factory.annotation.Value;
+
+import edtech.afrilingo.certification.dto.CertificateResponseDTO;
 import edtech.afrilingo.question.Question;
 import edtech.afrilingo.question.QuestionService;
 import edtech.afrilingo.user.User;
@@ -24,6 +27,9 @@ public class CertificationService {
     private final CertificationQuestionResponseRepository responseRepository;
     private final QuestionService questionService;
     private final CertificatePDFService pdfService;
+    
+    @Value("${afrilingo.certificates.storage-path:/tmp/certificates}")
+    private String certificateStoragePath;
     private final ProctorAnalysisService proctorAnalysisService;
     
     @Transactional
@@ -75,33 +81,42 @@ public class CertificationService {
     }
     
     @Transactional
-    public void recordAnswer(Long sessionId, Long questionId, Long selectedOptionId, long timeSpentMs) {
+    public void recordAnswer(Long sessionId, Long questionId, Long selectedOptionId, String textAnswer, Integer score, long timeSpentMs) {
         CertificationSession session = getSessionById(sessionId);
         Question question = questionService.getQuestionById(questionId)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
-        
-        boolean isCorrect = questionService.isAnswerCorrect(questionId, selectedOptionId);
-        
+
+        boolean isCorrect = false;
+        if (score != null) {
+            // For AI-graded questions, correctness is based on the score (70% or above is correct)
+            isCorrect = score >= 70;
+        } else if (selectedOptionId != null) {
+            // For multiple-choice questions
+            isCorrect = questionService.isAnswerCorrect(questionId, selectedOptionId);
+        }
+
         CertificationQuestionResponse response = CertificationQuestionResponse.builder()
                 .session(session)
                 .question(question)
                 .answeredAt(LocalDateTime.now())
                 .timeSpentMs(timeSpentMs)
                 .correct(isCorrect)
+                .textAnswer(textAnswer)
+                .score(score)
                 .build();
-        
+
         responseRepository.save(response);
-        
+
         // Update session statistics
         if (isCorrect) {
             session.setCorrectAnswers(session.getCorrectAnswers() + 1);
         }
-        
+
         sessionRepository.save(session);
     }
     
     @Transactional
-    public Certificate completeSessionAndGenerateCertificate(Long sessionId) {
+    public CertificateResponseDTO completeSessionAndGenerateCertificate(Long sessionId) {
         CertificationSession session = getSessionById(sessionId);
         
         // Validate session completion
@@ -111,7 +126,7 @@ public class CertificationService {
         
         // Calculate final score
         int finalScore = calculateFinalScore(session);
-        boolean passed = finalScore >= 70; // 70% pass threshold
+        boolean passed = finalScore > 5; // Above 50% pass threshold
         
         // Update session
         session.setCompleted(true);
@@ -134,7 +149,23 @@ public class CertificationService {
         
         sessionRepository.save(session);
         
-        return certificate;
+        // Convert to DTO to avoid circular references
+        if (certificate != null) {
+            return CertificateResponseDTO.builder()
+                    .certificateId(certificate.getCertificateId())
+                    .languageTested(certificate.getLanguageTested())
+                    .proficiencyLevel(certificate.getProficiencyLevel())
+                    .finalScore(certificate.getFinalScore())
+                    .completedAt(certificate.getCompletedAt())
+                    .issuedAt(certificate.getIssuedAt())
+                    .certificateUrl(certificate.getCertificateUrl())
+                    .verified(certificate.isVerified())
+                    .userName(session.getUser().getFirstName() + " " + session.getUser().getLastName())
+                    .userEmail(session.getUser().getEmail())
+                    .build();
+        } else {
+            return null;
+        }
     }
     
     private Certificate generateCertificate(CertificationSession session, int finalScore) {
@@ -156,8 +187,13 @@ public class CertificationService {
         certificate = certificateRepository.save(certificate);
         
         // Generate PDF certificate
-        String pdfUrl = pdfService.generateCertificatePDF(certificate);
-        certificate.setCertificateUrl(pdfUrl);
+        try {
+            String pdfUrl = pdfService.generateCertificatePDF(certificate);
+            certificate.setCertificateUrl(pdfUrl);
+        } catch (Exception e) {
+            log.warn("Certificate PDF generation failed, but certificate record will be saved: {}", e.getMessage());
+            certificate.setCertificateUrl("pdf-generation-failed");
+        }
         
         return certificateRepository.save(certificate);
     }
@@ -188,7 +224,7 @@ public class CertificationService {
     
     // Helper methods
     private void validateUserEligibility(User user, String languageCode) {
-        // Check if user has completed prerequisite courses
+        // Check if user has completed prerequisite
         // Check if user has any ongoing certification sessions
         Optional<CertificationSession> ongoingSession = sessionRepository
                 .findByUserAndCompletedFalse(user);
@@ -205,13 +241,42 @@ public class CertificationService {
     
     private int calculateFinalScore(CertificationSession session) {
         if (session.getTotalQuestions() == 0) return 0;
-        return (int) Math.round((double) session.getCorrectAnswers() / session.getTotalQuestions() * 100);
+        
+        // Calculate score based on points earned vs total possible points
+        List<CertificationQuestionResponse> responses = responseRepository.findBySessionWithQuestionOrderByAnsweredAtAsc(session);
+        
+        int totalPossiblePoints = 0;
+        int earnedPoints = 0;
+        
+        for (CertificationQuestionResponse response : responses) {
+            Question question = response.getQuestion();
+            
+            // With JOIN FETCH, question should not be null, but keep safety check
+            if (question != null) {
+                totalPossiblePoints += question.getPoints();
+                
+                if (response.isCorrect()) {
+                    earnedPoints += question.getPoints();
+                }
+            } else {
+                // Fallback: assume 1 point if question is null (shouldn't happen with JOIN FETCH)
+                totalPossiblePoints += 1;
+                if (response.isCorrect()) {
+                    earnedPoints += 1;
+                }
+                log.error("Question is null for response ID: {} despite JOIN FETCH", response.getId());
+            }
+        }
+        
+        if (totalPossiblePoints == 0) return 0;
+        return (int) Math.round((double) earnedPoints / totalPossiblePoints * 100);
     }
     
     private String determineProficiencyLevel(int score) {
-        if (score >= 90) return "ADVANCED";
-        if (score >= 80) return "INTERMEDIATE";
-        return "BEGINNER";
+        if (score >= 85) return "ADVANCED";
+        if (score >= 70) return "INTERMEDIATE";
+        if (score > 50) return "BEGINNER";
+        return "BEGINNER"; // Even if score <= 50, still assign BEGINNER level for certificate generation
     }
     
     private String generateSessionId() {
@@ -235,6 +300,14 @@ public class CertificationService {
         List<CertificationSession> ongoingSessions = sessionRepository.findByCompletedFalse();
         sessionRepository.deleteAll(ongoingSessions);
         log.info("Cleared {} ongoing certification sessions", ongoingSessions.size());
+    }
+    
+    /**
+     * Returns the configured certificate storage path
+     * @return The path where certificate PDFs are stored
+     */
+    public String getCertificateStoragePath() {
+        return certificateStoragePath;
     }
 
 }

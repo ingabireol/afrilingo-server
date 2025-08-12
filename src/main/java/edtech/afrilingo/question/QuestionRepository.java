@@ -60,6 +60,32 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query("SELECT q FROM Question q WHERE q.questionText LIKE CONCAT('%', :keyword, '%')")
     List<Question> findByQuestionTextContaining(@Param("keyword") String keyword);
 
+    @Query("SELECT q FROM Question q " +
+           "WHERE q.certificationQuestion = true " +
+           "AND q.id NOT IN :excludedIds " +
+           "ORDER BY RANDOM()")
+    List<Question> findRandomCertificationQuestionsByLanguage(
+            @Param("languageCode") String languageCode, 
+            @Param("testLevel") String testLevel, 
+            @Param("excludedIds") List<Long> excludedIds, 
+            Pageable pageable);
+
+    @Query("SELECT q FROM Question q " +
+           "WHERE q.certificationQuestion = true " +
+           "AND q.questionType = :type " +
+           "ORDER BY RANDOM()")
+    List<Question> findRandomCertificationQuestionsByTypeAndLanguage(
+            @Param("languageCode") String languageCode, 
+            @Param("testLevel") String testLevel, 
+            @Param("type") QuestionType type, 
+            Pageable pageable);
+
+    /**
+     * DEBUG: Find all questions, ignoring all filters.
+     */
+    @Query("SELECT q FROM Question q")
+    List<Question> findAllQuestionsForDebug(Pageable pageable);
+
     // ==================== CORRECTED CERTIFICATION METHODS ====================
 
     /**
@@ -70,7 +96,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query("SELECT q FROM Question q " +
             "WHERE q.certificationQuestion = true " +
             "AND (q.certificationLevel = :testLevel OR q.certificationLevel IS NULL) " +
-            "ORDER BY FUNCTION('RANDOM')")
+            "ORDER BY RANDOM()")
     List<Question> findCertificationQuestionsByLevel(
             @Param("testLevel") String testLevel,
             Pageable pageable);
@@ -80,7 +106,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      */
     @Query("SELECT q FROM Question q " +
             "WHERE q.certificationQuestion = true " +
-            "ORDER BY FUNCTION('RANDOM')")
+            "ORDER BY RANDOM()")
     List<Question> findAllCertificationQuestions(Pageable pageable);
 
     /**
@@ -91,7 +117,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             "WHERE q.quiz.id IN :quizIds " +
             "AND q.certificationQuestion = true " +
             "AND (q.certificationLevel = :testLevel OR q.certificationLevel IS NULL) " +
-            "ORDER BY FUNCTION('RANDOM')")
+            "ORDER BY RANDOM()")
     List<Question> findCertificationQuestionsByQuizIdsAndLevel(
             @Param("quizIds") List<Long> quizIds,
             @Param("testLevel") String testLevel,
@@ -102,13 +128,13 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      */
     @Query("SELECT q FROM Question q " +
             "WHERE q.quiz.id IN :quizIds " +
-            "ORDER BY FUNCTION('RANDOM')")
+            "ORDER BY RANDOM()")
     List<Question> findByQuizIds(@Param("quizIds") List<Long> quizIds, Pageable pageable);
 
     /**
      * Get random questions as fallback
      */
-    @Query("SELECT q FROM Question q ORDER BY FUNCTION('RANDOM')")
+    @Query("SELECT q FROM Question q ORDER BY RANDOM()")
     List<Question> findRandomQuestions(Pageable pageable);
 
     /**
@@ -116,7 +142,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      */
     @Query("SELECT q FROM Question q " +
             "WHERE q.certificationLevel = :testLevel " +
-            "ORDER BY FUNCTION('RANDOM')")
+            "ORDER BY RANDOM()")
     List<Question> findByCertificationLevel(@Param("testLevel") String testLevel, Pageable pageable);
 
     /**
@@ -127,7 +153,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             "WHERE q.quiz.title LIKE CONCAT('%', :languageKeyword, '%') " +
             "AND (q.certificationQuestion = true OR q.certificationQuestion IS NULL) " +
             "AND (q.certificationLevel = :testLevel OR q.certificationLevel IS NULL) " +
-            "ORDER BY FUNCTION('RANDOM')")
+            "ORDER BY RANDOM()")
     List<Question> findQuestionsByQuizTitleContainingAndLevel(
             @Param("languageKeyword") String languageKeyword,
             @Param("testLevel") String testLevel,

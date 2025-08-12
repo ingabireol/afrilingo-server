@@ -120,10 +120,11 @@ public class UserProfileController {
 
     @Operation(summary = "Update profile picture", description = "Updates the user's profile picture")
     @PutMapping("/picture")
-    public ResponseEntity<ApiResponse<UserProfile>> updateProfilePicture(@RequestBody String profilePicture) {
+    public ResponseEntity<ApiResponse<UserProfile>> updateProfilePicture(@RequestBody Map<String, String> body) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
 
+        String profilePicture = body != null ? body.get("profilePicture") : null;
         UserProfile updatedProfile = userProfileService.updateProfilePicture(currentUser.getId(), profilePicture);
 
         return ResponseEntity.ok(ApiResponse.success(updatedProfile, "Profile picture updated successfully"));

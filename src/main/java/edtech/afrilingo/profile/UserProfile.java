@@ -26,11 +26,13 @@ public class UserProfile {
     private String country;
     private String firstLanguage;
 
+
+    @Column(name = "profile_picture", columnDefinition = "text")
     private String profilePicture;
     
     @Column(name = "learning_reason")
     private String reasonToLearn;
-    
+
     // A user can have preferences for multiple languages to learn
     @ManyToMany
     @JoinTable(

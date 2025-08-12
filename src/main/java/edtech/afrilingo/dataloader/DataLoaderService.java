@@ -83,12 +83,6 @@ public class DataLoaderService {
                             .code("SW")
                             .description("Kiswahili is widely spoken across East Africa and is an official language in Kenya, Tanzania, and Uganda.")
                             .flagImage("swahili-flag.png")
-                            .build(),
-                    Language.builder()
-                            .name("English")
-                            .code("EN")
-                            .description("English is a global language and is used as an official language in many African countries.")
-                            .flagImage("english-flag.png")
                             .build()
             );
 
@@ -114,7 +108,6 @@ public class DataLoaderService {
             // Get languages
             Language kinyarwanda = languageRepository.findByCode("RW").orElseThrow();
             Language kiswahili = languageRepository.findByCode("SW").orElseThrow();
-            Language english = languageRepository.findByCode("EN").orElseThrow();
 
             List<Course> courses = new ArrayList<>();
 
@@ -142,6 +135,61 @@ public class DataLoaderService {
                     .description("Master Kinyarwanda with advanced topics including literature, poetry, and cultural expressions.")
                     .level("Advanced")
                     .image("kinyarwanda-advanced.jpg")
+                    .isActive(true)
+                    .language(kinyarwanda)
+                    .build());
+
+            // Additional comprehensive Kinyarwanda courses
+            courses.add(Course.builder()
+                    .title("Business Kinyarwanda")
+                    .description("Professional Kinyarwanda for workplace communication, meetings, and formal presentations.")
+                    .level("Intermediate")
+                    .image("kinyarwanda-business.jpg")
+                    .isActive(true)
+                    .language(kinyarwanda)
+                    .build());
+
+            courses.add(Course.builder()
+                    .title("Kinyarwanda Grammar Mastery")
+                    .description("Comprehensive grammar course covering verb conjugations, noun classes, and complex sentence structures.")
+                    .level("Advanced")
+                    .image("kinyarwanda-grammar.jpg")
+                    .isActive(true)
+                    .language(kinyarwanda)
+                    .build());
+
+            courses.add(Course.builder()
+                    .title("Conversational Kinyarwanda")
+                    .description("Focus on practical conversation skills for daily interactions and social situations.")
+                    .level("Intermediate")
+                    .image("kinyarwanda-conversation.jpg")
+                    .isActive(true)
+                    .language(kinyarwanda)
+                    .build());
+
+            courses.add(Course.builder()
+                    .title("Kinyarwanda for Healthcare")
+                    .description("Medical and healthcare vocabulary in Kinyarwanda for professionals and patients.")
+                    .level("Intermediate")
+                    .image("kinyarwanda-healthcare.jpg")
+                    .isActive(true)
+                    .language(kinyarwanda)
+                    .build());
+
+            courses.add(Course.builder()
+                    .title("Academic Kinyarwanda")
+                    .description("Advanced Kinyarwanda for academic writing, research, and scholarly communication.")
+                    .level("Advanced")
+                    .image("kinyarwanda-academic.jpg")
+                    .isActive(true)
+                    .language(kinyarwanda)
+                    .build());
+
+            courses.add(Course.builder()
+                    .title("Kinyarwanda Pronunciation Guide")
+                    .description("Master correct pronunciation, tone, and accent patterns in Kinyarwanda.")
+                    .level("Beginner")
+                    .image("kinyarwanda-pronunciation.jpg")
                     .isActive(true)
                     .language(kinyarwanda)
                     .build());
@@ -174,33 +222,7 @@ public class DataLoaderService {
                     .language(kiswahili)
                     .build());
 
-            // English courses for African speakers
-            courses.add(Course.builder()
-                    .title("English for Beginners")
-                    .description("Learn basic English vocabulary and phrases with an African context.")
-                    .level("Beginner")
-                    .image("english-beginner.jpg")
-                    .isActive(true)
-                    .language(english)
-                    .build());
 
-            courses.add(Course.builder()
-                    .title("Intermediate English")
-                    .description("Improve your English skills with a focus on African contexts and expressions.")
-                    .level("Intermediate")
-                    .image("english-intermediate.jpg")
-                    .isActive(true)
-                    .language(english)
-                    .build());
-
-            courses.add(Course.builder()
-                    .title("Business English for Africans")
-                    .description("Master business English terminology and communication skills for professional settings.")
-                    .level("Advanced")
-                    .image("english-business.jpg")
-                    .isActive(true)
-                    .language(english)
-                    .build());
 
             courseRepository.saveAll(courses);
         } catch (Exception e) {
@@ -362,7 +384,7 @@ public class DataLoaderService {
                 "Rwanda",
                 "English",
                 "To help others learn African languages",
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+                null,
                 true,
                 60,
                 "09:00",
@@ -379,7 +401,7 @@ public class DataLoaderService {
                 "Rwanda",
                 "Kinyarwanda",
                 "To connect with my roots",
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=buntu",
+                null,
                 true,
                 30,
                 "19:00",
@@ -395,7 +417,7 @@ public class DataLoaderService {
                 "Kenya",
                 "English",
                 "Travel to East Africa",
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=jane",
+                null,
                 true,
                 20,
                 "08:00",
@@ -411,7 +433,7 @@ public class DataLoaderService {
                 "South Africa",
                 "English",
                 "Business opportunities",
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=robert",
+                null,
                 false,
                 15,
                 "20:00",
@@ -500,20 +522,15 @@ public class DataLoaderService {
 
         // Add language-specific lessons
         if ("RW".equals(languageCode)) {
-            lessonData.add(new LessonData("Rwandan Culture",
-                    "Understanding cultural aspects of Rwanda", LessonType.READING));
-            lessonData.add(new LessonData("Traditional Music",
-                    "Explore Rwandan musical traditions", LessonType.AUDIO));
+            lessonData.add(new LessonData("Advanced Grammar",
+                    "Master complex Kinyarwanda grammar structures", LessonType.READING));
+            lessonData.add(new LessonData("Business Kinyarwanda",
+                    "Professional Kinyarwanda for workplace communication", LessonType.AUDIO));
         } else if ("SW".equals(languageCode)) {
             lessonData.add(new LessonData("East African Customs",
                     "Cultural practices across East Africa", LessonType.READING));
             lessonData.add(new LessonData("Coastal Swahili",
                     "Dialect variations along the coast", LessonType.AUDIO));
-        } else if ("EN".equals(languageCode)) {
-            lessonData.add(new LessonData("African English Variations",
-                    "Understanding regional English dialects in Africa", LessonType.READING));
-            lessonData.add(new LessonData("English in Business",
-                    "Professional English in African contexts", LessonType.AUDIO));
         }
 
         return lessonData;
@@ -770,11 +787,8 @@ public class DataLoaderService {
             } else {
                 content.append("* No idioms available for this language code: ").append(languageCode).append("\n");
             }
-        } else if (lessonTitle.contains("Culture")) {
-            content.append("## Cultural Context\n\n");
-            String culturalNote = LanguageContentHelper.getCulturalNote(languageCode);
-            content.append(culturalNote != null ? culturalNote : "Cultural information not available for this language code: " + languageCode);
-        } else {
+        }
+        else {
             // Generic content for other lesson types
             content.append("## Introduction\n\n");
             content.append("This lesson will introduce you to important vocabulary and concepts related to ").append(lessonTitle).append(".\n\n");
@@ -861,6 +875,34 @@ public class DataLoaderService {
             questions.add(q1);
             questions.add(q2);
             questions.add(q3);
+
+            // Add more Kinyarwanda questions for certification
+            Question q4 = Question.builder()
+                    .questionText("Which of the following means 'water'?")
+                    .questionType(QuestionType.MULTIPLE_CHOICE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q5 = Question.builder()
+                    .questionText("'Imodoka' means 'car'.")
+                    .questionType(QuestionType.TRUE_FALSE)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            Question q6 = Question.builder()
+                    .questionText("The word for 'teacher' is '_____'.")
+                    .questionType(QuestionType.FILL_BLANK)
+                    .points(1)
+                    .quiz(quiz)
+                    .build();
+
+            questions.add(q4);
+            questions.add(q5);
+            questions.add(q6);
+
+            // Removed OPEN_ENDED from quizzes per requirement: quizzes are not open-ended
         } else if ("SW".equals(languageCode)) {
             // Multiple choice question
             Question q1 = Question.builder()
@@ -1571,9 +1613,26 @@ public class DataLoaderService {
                 .quiz(quiz)
                 .build();
 
+        // Replace open-ended with additional multiple choice / true-false aligned to lesson
+        Question q4 = Question.builder()
+                .questionText("Which statement best summarizes a key idea from '" + lessonTitle + "'?")
+                .questionType(QuestionType.MULTIPLE_CHOICE)
+                .points(1)
+                .quiz(quiz)
+                .build();
+
+        Question q5 = Question.builder()
+                .questionText("The content of '" + lessonTitle + "' includes practical examples.")
+                .questionType(QuestionType.TRUE_FALSE)
+                .points(1)
+                .quiz(quiz)
+                .build();
+
         questions.add(q1);
         questions.add(q2);
         questions.add(q3);
+        questions.add(q4);
+        questions.add(q5);
 
         return questions;
     }
@@ -1584,12 +1643,18 @@ public class DataLoaderService {
         String questionText = question.getQuestionText();
 
         if (type == QuestionType.MULTIPLE_CHOICE) {
-            if (questionText.contains("Hello") && "RW".equals(languageCode)) {
+            // Greeting questions - enhanced patterns
+            if ((questionText.contains("Hello") || questionText.contains("hello")) && "RW".equals(languageCode)) {
                 options.add(Option.builder().optionText("Uraho").isCorrect(false).question(question).build());
                 options.add(Option.builder().optionText("Muraho").isCorrect(true).question(question).build());
                 options.add(Option.builder().optionText("Mwaramutse").isCorrect(false).question(question).build());
                 options.add(Option.builder().optionText("Mwiriwe").isCorrect(false).question(question).build());
-            } else if (questionText.contains("greeting") && "SW".equals(languageCode)) {
+            } else if ((questionText.contains("greeting") || questionText.contains("greet")) && "RW".equals(languageCode)) {
+                options.add(Option.builder().optionText("Muraho").isCorrect(true).question(question).build());
+                options.add(Option.builder().optionText("Mwaramutse").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Amakuru").isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText("Mwicuze").isCorrect(false).question(question).build());
+            } else if ((questionText.contains("greeting") || questionText.contains("greet")) && "SW".equals(languageCode)) {
                 options.add(Option.builder().optionText("Jambo").isCorrect(true).question(question).build());
                 options.add(Option.builder().optionText("Habari").isCorrect(false).question(question).build());
                 options.add(Option.builder().optionText("Nzuri").isCorrect(false).question(question).build());
@@ -1675,14 +1740,180 @@ public class DataLoaderService {
 
                 options.add(Option.builder().optionText(directionTerms.get("left")).isCorrect(true).question(question).build());
                 options.add(Option.builder().optionText(directionTerms.get("right")).isCorrect(false).question(question).build());
-                options.add(Option.builder().optionText(directionTerms.get("straight ahead")).isCorrect(false).question(question).build());
-                options.add(Option.builder().optionText(directionTerms.get("turn around")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(directionTerms.get("straight")).isCorrect(false).question(question).build());
+                options.add(Option.builder().optionText(directionTerms.get("up")).isCorrect(false).question(question).build());
+            } else if (questionText.contains("teacher") || questionText.contains("Teacher")) {
+                if ("RW".equals(languageCode)) {
+                    options.add(Option.builder().optionText("Umwarimu").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Umunyeshuri").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Umukozi").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Umuyobozi").isCorrect(false).question(question).build());
+                } else if ("SW".equals(languageCode)) {
+                    options.add(Option.builder().optionText("Mwalimu").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Mwanafunzi").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Mfanyakazi").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Meneja").isCorrect(false).question(question).build());
+                }
+            } else if (questionText.contains("car") || questionText.contains("Car")) {
+                if ("RW".equals(languageCode)) {
+                    options.add(Option.builder().optionText("Imodoka").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Ikinyabiziga").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Indege").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Ubwato").isCorrect(false).question(question).build());
+                } else if ("SW".equals(languageCode)) {
+                    options.add(Option.builder().optionText("Gari").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Baiskeli").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Ndege").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Meli").isCorrect(false).question(question).build());
+                }
+            } else if (questionText.contains("book") || questionText.contains("Book")) {
+                if ("RW".equals(languageCode)) {
+                    options.add(Option.builder().optionText("Igitabo").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Ikaramu").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Impapuro").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Ikibaho").isCorrect(false).question(question).build());
+                } else if ("SW".equals(languageCode)) {
+                    options.add(Option.builder().optionText("Kitabu").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Kalamu").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Karatasi").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Meza").isCorrect(false).question(question).build());
+                }
+            
+            // Business-related questions
+            } else if ((questionText.contains("Business") || questionText.contains("business")) && "RW".equals(languageCode)) {
+                if (questionText.contains("best relates") || questionText.contains("statement")) {
+                    options.add(Option.builder().optionText("Essential for professional communication").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Only used in markets").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Not important for work").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Only for formal meetings").isCorrect(false).question(question).build());
+                } else if (questionText.contains("key concept")) {
+                    options.add(Option.builder().optionText("Professional courtesy").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Market pricing").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Food preparation").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Weather patterns").isCorrect(false).question(question).build());
             } else {
-                // Generic options for other types of questions
+                    options.add(Option.builder().optionText("Ubucuruzi").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Umugati").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Amazi").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Inkoko").isCorrect(false).question(question).build());
+                }
+            
+            // Grammar-related questions  
+            } else if ((questionText.contains("Grammar") || questionText.contains("grammar")) && "RW".equals(languageCode)) {
+                if (questionText.contains("best relates") || questionText.contains("statement")) {
+                    options.add(Option.builder().optionText("Foundation of proper communication").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Only for writing").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Not needed for speaking").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Only for formal situations").isCorrect(false).question(question).build());
+                } else if (questionText.contains("key concept")) {
+                    options.add(Option.builder().optionText("Sentence structure").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Food types").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Weather conditions").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Market goods").isCorrect(false).question(question).build());
+                } else {
+                    options.add(Option.builder().optionText("Ikinyamakuru").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Ibirayi").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Umugati").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Amazi").isCorrect(false).question(question).build());
+                }
+            
+            // Conversational-related questions
+            } else if ((questionText.contains("Conversational") || questionText.contains("conversation")) && "RW".equals(languageCode)) {
+                if (questionText.contains("best relates") || questionText.contains("statement")) {
+                    options.add(Option.builder().optionText("Essential for daily interactions").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Only for formal events").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Not important in modern times").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Only for elderly people").isCorrect(false).question(question).build());
+                } else if (questionText.contains("key concept")) {
+                    options.add(Option.builder().optionText("Natural dialogue flow").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Cooking methods").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Transportation modes").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Building materials").isCorrect(false).question(question).build());
+                } else {
+                    options.add(Option.builder().optionText("Ikiganiro").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Inkoko").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Umugati").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Amazi").isCorrect(false).question(question).build());
+                }
+            
+            // Healthcare-related questions
+            } else if ((questionText.contains("Healthcare") || questionText.contains("health")) && "RW".equals(languageCode)) {
+                if (questionText.contains("best relates") || questionText.contains("statement")) {
+                    options.add(Option.builder().optionText("Critical for medical communication").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Only for doctors").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Not necessary for patients").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Only for emergencies").isCorrect(false).question(question).build());
+                } else if (questionText.contains("key concept")) {
+                    options.add(Option.builder().optionText("Clear symptom description").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Food recipes").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Dance moves").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Sports rules").isCorrect(false).question(question).build());
+                } else {
+                    options.add(Option.builder().optionText("Ubuzima").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Umugati").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Inkoko").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Amazi").isCorrect(false).question(question).build());
+                }
+            
+            // Academic-related questions
+            } else if ((questionText.contains("Academic") || questionText.contains("academic")) && "RW".equals(languageCode)) {
+                if (questionText.contains("best relates") || questionText.contains("statement")) {
+                    options.add(Option.builder().optionText("Essential for educational success").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Only for university students").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Not needed for learning").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Only for research").isCorrect(false).question(question).build());
+                } else if (questionText.contains("key concept")) {
+                    options.add(Option.builder().optionText("Structured learning approach").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Kitchen utensils").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Garden plants").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Clothing styles").isCorrect(false).question(question).build());
+                } else {
+                    options.add(Option.builder().optionText("Ubumenyi").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Ibirayi").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Umugati").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Inkoko").isCorrect(false).question(question).build());
+                }
+            
+            // Pronunciation-related questions
+            } else if ((questionText.contains("Pronunciation") || questionText.contains("pronunciation")) && "RW".equals(languageCode)) {
+                if (questionText.contains("best relates") || questionText.contains("statement")) {
+                    options.add(Option.builder().optionText("Fundamental for clear communication").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Only matters for singers").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Not important for understanding").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Only for teachers").isCorrect(false).question(question).build());
+                } else if (questionText.contains("key concept")) {
+                    options.add(Option.builder().optionText("Correct sound production").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Farming techniques").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Market prices").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Weather forecast").isCorrect(false).question(question).build());
+                } else {
+                    options.add(Option.builder().optionText("Imvugo").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Amazi").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Umugati").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Inkoko").isCorrect(false).question(question).build());
+                }
+            
+            } else {
+                // Improved fallback for unmatched questions based on language
+                if ("RW".equals(languageCode)) {
+                    // Kinyarwanda vocabulary fallback
+                    options.add(Option.builder().optionText("Amazi").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Umugati").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Inkoko").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Ibirayi").isCorrect(false).question(question).build());
+                } else if ("SW".equals(languageCode)) {
+                    // Kiswahili vocabulary fallback
+                    options.add(Option.builder().optionText("Maji").isCorrect(true).question(question).build());
+                    options.add(Option.builder().optionText("Mkate").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Kuku").isCorrect(false).question(question).build());
+                    options.add(Option.builder().optionText("Kiazi").isCorrect(false).question(question).build());
+                } else {
+                    // Default fallback (should rarely be used now)
                 options.add(Option.builder().optionText("Option A").isCorrect(true).question(question).build());
                 options.add(Option.builder().optionText("Option B").isCorrect(false).question(question).build());
                 options.add(Option.builder().optionText("Option C").isCorrect(false).question(question).build());
                 options.add(Option.builder().optionText("Option D").isCorrect(false).question(question).build());
+                }
             }
         } else if (type == QuestionType.TRUE_FALSE) {
             // For True/False questions
@@ -1799,7 +2030,7 @@ public class DataLoaderService {
         return switch (languageCode) {
             case "RW" -> "Kinyarwanda";
             case "SW" -> "Kiswahili";
-            case "EN" -> "English";
+
             default -> "Unknown Language";
         };
     }
@@ -1868,7 +2099,7 @@ public class DataLoaderService {
             return; // Skip if profile already exists
         }
 
-        // Get languages to learn
+        // Get languages to learnt
         // Implement findByCodeIn manually since it doesn't exist
         List<Language> languagesToLearn = new ArrayList<>();
         for (String code : languageCodes) {

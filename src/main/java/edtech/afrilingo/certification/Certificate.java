@@ -1,5 +1,6 @@
 package edtech.afrilingo.certification;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import edtech.afrilingo.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,8 +34,10 @@ public class Certificate {
     
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore  // Prevent circular reference
     private User user;
     
     @OneToOne(mappedBy = "certificate", cascade = CascadeType.ALL)
+    @JsonIgnore  // Prevent circular reference
     private CertificationSession session;
 }

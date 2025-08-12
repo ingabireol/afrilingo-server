@@ -32,6 +32,7 @@ public class UserProgressController {
     private final LessonService lessonService;
     private final QuizService quizService;
     private final UserQuizAttemptRepository userQuizAttemptRepository;
+    private final edtech.afrilingo.notification.WebSocketNotificationController wsNotifier;
 
     @Operation(summary = "Get user streak", description = "Returns the current streak for the authenticated user")
     @GetMapping("/streak")
@@ -85,6 +86,11 @@ public class UserProgressController {
         
         userProgressRepository.save(progress);
         
+        try {
+            wsNotifier.sendNotification(currentUser.getId(), "lesson_access:" + lessonId);
+            wsNotifier.sendNotificationToUser(currentUser.getUsername(), "lesson_access:" + lessonId);
+        } catch (Exception ignored) {}
+
         return ResponseEntity.ok(ApiResponse.success(progress));
     }
     
@@ -122,6 +128,11 @@ public class UserProgressController {
         
         userProgressRepository.save(progress);
         
+        try {
+            wsNotifier.sendNotification(currentUser.getId(), "lesson_completed:" + lessonId);
+            wsNotifier.sendNotificationToUser(currentUser.getUsername(), "lesson_completed:" + lessonId);
+        } catch (Exception ignored) {}
+
         return ResponseEntity.ok(ApiResponse.success(progress));
     }
     
@@ -153,7 +164,33 @@ public class UserProgressController {
         
         userQuizAttemptRepository.save(attempt);
         
+        try {
+            wsNotifier.sendNotification(currentUser.getId(), "quiz_attempt:" + quizId);
+            wsNotifier.sendNotificationToUser(currentUser.getUsername(), "quiz_attempt:" + quizId);
+            if (passed) {
+                wsNotifier.sendNotificationToUser(currentUser.getUsername(), "challenge_passed:" + quizId);
+            }
+        } catch (Exception ignored) {}
+
         return ResponseEntity.ok(ApiResponse.success(attempt));
+    }
+
+    @Operation(summary = "Update learning time", description = "Accepts a batch of minutes learned to aggregate server-side")
+    @PostMapping("/learning-time")
+    public ResponseEntity<ApiResponse<String>> postLearningTime(@RequestBody Map<String, Object> body) {
+        // Optional aggregation point; accept and emit a best-effort daily goal notification if possible
+        try {
+            User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Object minutesObj = body != null ? body.get("minutes") : null;
+            int minutes = 0;
+            if (minutesObj instanceof Number) {
+                minutes = ((Number) minutesObj).intValue();
+            }
+            if (minutes >= 15) { // heuristic threshold when we lack aggregation
+                wsNotifier.sendNotificationToUser(currentUser.getUsername(), "daily_goal_achieved:" + minutes);
+            }
+        } catch (Exception ignored) {}
+        return ResponseEntity.ok(ApiResponse.success("ok"));
     }
     
     /**
@@ -208,5 +245,44 @@ public class UserProgressController {
         }
         
         return streak;
+    }
+
+    @Operation(summary = "Get learning time snapshot", description = "Returns summarized learning time data for the authenticated user")
+    @GetMapping("/learning-time")
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> getLearningTime() {
+        // For now, provide a minimal stub that returns zeros; client primarily uses local cache
+        Map<String, Integer> data = new HashMap<>();
+        data.put("today", 0);
+        data.put("week", 0);
+        data.put("month", 0);
+        data.put("total", 0);
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    @Operation(summary = "Check lesson completion", description = "Returns completion status for a lesson")
+    @GetMapping("/lessons/{lessonId}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> isLessonCompleted(@PathVariable Long lessonId) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<UserProgress> progress = userProgressRepository.findByUserIdAndLessonId(currentUser.getId(), lessonId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("completed", progress.isPresent() && Boolean.TRUE.equals(progress.get().isCompleted()));
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    @Operation(summary = "Check quiz completion for lesson", description = "Returns pass/complete status for the lesson's quiz")
+    @GetMapping("/quizzes/lesson/{lessonId}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> isQuizCompletedByLesson(@PathVariable Long lessonId) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Quiz> quizzes = quizService.getQuizzesByLessonId(lessonId);
+        boolean passed = false;
+        if (!quizzes.isEmpty()) {
+            Long quizId = quizzes.get(0).getId();
+            List<UserQuizAttempt> attempts = userQuizAttemptRepository.findByUserIdAndQuizId(currentUser.getId(), quizId);
+            passed = attempts.stream().anyMatch(UserQuizAttempt::isPassed);
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("completed", passed);
+        data.put("passed", passed);
+        return ResponseEntity.ok(ApiResponse.success(data));
     }
 }
