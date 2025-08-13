@@ -61,7 +61,16 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/admin/data-loader/**").permitAll()
                         .requestMatchers("/api/v1/certification/certificates/download/**").permitAll()
                         // WebSocket endpoints
-                        .requestMatchers("/ws", "/ws/**").permitAll()
+                        .requestMatchers(
+                                "/ws", 
+                                "/ws/**",
+                                "/websocket/**",
+                                "/stomp/**",
+                                "/topic/**",
+                                "/app/**",
+                                "/queue/**",
+                                "/user/**"
+                        ).permitAll()
                         // Error endpoints
                         .requestMatchers("/error").permitAll()
                         // All other endpoints require authentication

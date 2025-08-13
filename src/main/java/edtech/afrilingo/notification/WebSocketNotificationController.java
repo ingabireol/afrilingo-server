@@ -22,9 +22,9 @@ public class WebSocketNotificationController {
     }
 
     public void sendNotification(Long userId, String payload) {
-        // Send to a user-specific topic; client can subscribe to /topic/notifications.{userId}
+        // Deprecated broadcast to topic retained for compatibility but not used by new flows
         String destination = "/topic/notifications." + userId;
-        log.info("[WS] Publishing to {} payload={}", destination, payload);
+        log.info("[WS] Publishing (compat) to {} payload={}", destination, payload);
         messagingTemplate.convertAndSend(destination, payload);
     }
 
