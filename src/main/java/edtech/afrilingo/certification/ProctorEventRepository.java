@@ -19,4 +19,13 @@ public interface ProctorEventRepository extends JpaRepository<ProctorEvent, Long
     
     @Query("SELECT pe FROM ProctorEvent pe WHERE pe.timestamp BETWEEN :start AND :end AND pe.flagged = true")
     List<ProctorEvent> findFlaggedEventsBetween(LocalDateTime start, LocalDateTime end);
+
+    // New: find all proctor events for a specific user, ordered by timestamp
+    List<ProctorEvent> findBySession_User_IdOrderByTimestampAsc(Long userId);
+
+    // New: find all proctor events for a specific session id, ordered by timestamp
+    List<ProctorEvent> findBySession_IdOrderByTimestampAsc(Long sessionId);
+
+    // New: find all proctor events across all users, ordered by timestamp
+    List<ProctorEvent> findAllByOrderByTimestampAsc();
 }

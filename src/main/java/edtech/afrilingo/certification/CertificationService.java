@@ -310,4 +310,23 @@ public class CertificationService {
         return certificateStoragePath;
     }
 
+    // New: Retrieve proctor events for a specific user
+    public List<ProctorEvent> getProctorEventsByUserId(Long userId) {
+        return proctorEventRepository.findBySession_User_IdOrderByTimestampAsc(userId);
+    }
+
+    // New: Retrieve proctor events for a specific session
+    public List<ProctorEvent> getProctorEventsBySessionId(Long sessionId) {
+        return proctorEventRepository.findBySession_IdOrderByTimestampAsc(sessionId);
+    }
+
+    // New: Retrieve proctor events for all users
+    public List<ProctorEvent> getAllProctorEvents() {
+        return proctorEventRepository.findAllByOrderByTimestampAsc();
+    }
+
+    // New: Retrieve all certificates across users, newest first
+    public List<Certificate> getAllCertificates() {
+        return certificateRepository.findAllByOrderByIssuedAtDesc();
+    }
 }

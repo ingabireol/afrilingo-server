@@ -138,6 +138,42 @@ public class CertificationController {
                     .body(ApiResponse.error(400, e.getMessage()));
         }
     }
+
+    // New: Retrieve proctor events for a specific session
+    @Operation(summary = "Get proctor events for session", description = "Retrieve all proctor events for a certification session")
+    @GetMapping("/sessions/{sessionId}/proctor-events")
+    public ResponseEntity<ApiResponse<List<ProctorEvent>>> getProctorEventsForSession(@PathVariable Long sessionId) {
+        try {
+            List<ProctorEvent> events = certificationService.getProctorEventsBySessionId(sessionId);
+            return ResponseEntity.ok(ApiResponse.success(events));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, e.getMessage()));
+        }
+    }
+    
+    // New: Retrieve proctor events for a specific user
+    @Operation(summary = "Get proctor events for user", description = "Retrieve all proctor events across certification sessions for a specific user")
+    @GetMapping("/users/{userId}/proctor-events")
+    public ResponseEntity<ApiResponse<List<ProctorEvent>>> getProctorEventsForUser(@PathVariable Long userId) {
+        try {
+            List<ProctorEvent> events = certificationService.getProctorEventsByUserId(userId);
+            return ResponseEntity.ok(ApiResponse.success(events));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, e.getMessage()));
+        }
+    }
+
+    // New: Retrieve proctor events across all users
+    @Operation(summary = "Get proctor events for all users", description = "Retrieve all proctor events across all certification sessions and users")
+    @GetMapping("/proctor-events")
+    public ResponseEntity<ApiResponse<List<ProctorEvent>>> getAllProctorEvents() {
+        try {
+            List<ProctorEvent> events = certificationService.getAllProctorEvents();
+            return ResponseEntity.ok(ApiResponse.success(events));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, e.getMessage()));
+        }
+    }
     
     @Operation(summary = "Get user certificates", description = "Get all certificates for current user")
     @GetMapping("/certificates")
@@ -145,6 +181,14 @@ public class CertificationController {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         
         List<Certificate> certificates = certificationService.getUserCertificates(currentUser);
+        return ResponseEntity.ok(ApiResponse.success(certificates));
+    }
+
+    // New: Retrieve all certificates across all users
+    @Operation(summary = "Get all certificates", description = "Retrieve all issued certificates across all users")
+    @GetMapping("/certificates/all")
+    public ResponseEntity<ApiResponse<List<Certificate>>> getAllCertificates() {
+        List<Certificate> certificates = certificationService.getAllCertificates();
         return ResponseEntity.ok(ApiResponse.success(certificates));
     }
     
