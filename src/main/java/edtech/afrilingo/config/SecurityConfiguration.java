@@ -52,7 +52,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:9090"));
+        configuration.setAllowedOrigins(List.of("http://localhost:9090", "http://127.0.0.1:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
         configuration.setExposedHeaders(List.of("x-auth-token"));
@@ -81,7 +81,12 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/profile/**").permitAll()
                         .requestMatchers("/api/admin/data-loader/**").permitAll()
                         .requestMatchers("/api/v1/certification/certificates/download/**").permitAll()
+                        // Public: Proctor events for specific users
+                        .requestMatchers("/api/v1/certification/**").permitAll()
+                        .requestMatchers("/api/v1/certification/users/*/proctor-events").permitAll()
+                        .requestMatchers("api/v1/certification/sessions/{sessionId}/proctor-events").permitAll()
                         .requestMatchers("/api/v1/certification/certificates/**").authenticated()
+
                         .requestMatchers("/api/v1/users/**").permitAll()
                         // WebSocket endpoints
                         .requestMatchers(

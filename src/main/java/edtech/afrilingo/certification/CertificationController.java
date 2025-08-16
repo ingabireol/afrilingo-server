@@ -120,6 +120,20 @@ public class CertificationController {
                     .body(ApiResponse.error(400, e.getMessage()));
         }
     }
+
+    @Operation(summary = "Terminate certification session", description = "Terminate a session without generating a certificate (e.g., user left the test)")
+    @PostMapping("/sessions/{sessionId}/terminate")
+    public ResponseEntity<ApiResponse<String>> terminateSession(
+            @PathVariable Long sessionId,
+            @RequestParam(required = false) String reason) {
+        try {
+            certificationService.terminateSession(sessionId, reason);
+            return ResponseEntity.ok(ApiResponse.success("Session terminated successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(400, e.getMessage()));
+        }
+    }
     
     @Operation(summary = "Record proctoring event", description = "Record suspicious activity during test")
     @PostMapping("/sessions/{sessionId}/proctor-events")
@@ -169,6 +183,18 @@ public class CertificationController {
     public ResponseEntity<ApiResponse<List<ProctorEvent>>> getAllProctorEvents() {
         try {
             List<ProctorEvent> events = certificationService.getAllProctorEvents();
+            return ResponseEntity.ok(ApiResponse.success(events));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, e.getMessage()));
+        }
+    }
+
+    // New: Retrieve proctor events for a specific user within a session (public)
+    @Operation(summary = "Get proctor events for user in session", description = "Retrieve proctor events for a specific user within a specific session")
+    @GetMapping("/sessions/{sessionId}/users/{userId}/proctor-events")
+    public ResponseEntity<ApiResponse<List<ProctorEvent>>> getProctorEventsForUserInSession(@PathVariable Long sessionId, @PathVariable Long userId) {
+        try {
+            List<ProctorEvent> events = certificationService.getProctorEventsBySessionIdAndUserId(sessionId, userId);
             return ResponseEntity.ok(ApiResponse.success(events));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400, e.getMessage()));

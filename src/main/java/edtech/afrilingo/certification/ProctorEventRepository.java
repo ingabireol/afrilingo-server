@@ -28,4 +28,7 @@ public interface ProctorEventRepository extends JpaRepository<ProctorEvent, Long
 
     // New: find all proctor events across all users, ordered by timestamp
     List<ProctorEvent> findAllByOrderByTimestampAsc();
+
+    // New: find proctor events for a specific session and user, ordered by timestamp
+    List<ProctorEvent> findBySession_IdAndSession_User_IdOrderByTimestampAsc(Long sessionId, Long userId);
 }
