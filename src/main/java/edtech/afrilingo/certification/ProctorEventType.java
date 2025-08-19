@@ -3,7 +3,7 @@ package edtech.afrilingo.certification;
 public enum ProctorEventType {
     FACE_NOT_DETECTED,
     MULTIPLE_FACES_DETECTED,
-    LOOKING_AWAY,
+    EXTENDED_LOOK_AWAY,
     PROHIBITED_OBJECT_DETECTED,
     SUSPICIOUS_MOVEMENT,
     AUDIO_ANOMALY,
@@ -14,5 +14,6 @@ public enum ProctorEventType {
     SESSION_END,
     WARNING_ISSUED,
     SESSION_TERMINATED,
-    INACTIVITY_DETECTED
+    INACTIVITY_DETECTED,
+    APP_FOCUS_LOST
 }

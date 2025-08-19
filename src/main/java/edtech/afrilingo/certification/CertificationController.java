@@ -121,6 +121,69 @@ public class CertificationController {
         }
     }
 
+    @Operation(summary = "Complete certification and download PDF", description = "Completes the session, generates the certificate PDF and returns the file directly for download")
+    @PostMapping(value = "/sessions/{sessionId}/complete/download")
+    public ResponseEntity<Resource> completeCertificationAndDownload(@PathVariable Long sessionId) {
+        try {
+            CertificateResponseDTO certificate = certificationService.completeSessionAndGenerateCertificate(sessionId);
+            if (certificate == null) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .header("Content-Type", "application/json")
+                        .body(null);
+            }
+
+            // Derive the expected filename used by the PDF generator
+            String fileName = "certificate_" + certificate.getCertificateId() + ".pdf";
+            String storagePath = certificationService.getCertificateStoragePath();
+            Path base = Paths.get(storagePath).toAbsolutePath().normalize();
+            Path path = base.resolve(fileName).normalize();
+
+            // Prevent path traversal
+            if (!path.startsWith(base)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+
+            if (!Files.exists(path)) {
+                // As a fallback, try to infer from the URL if present
+                if (certificate.getCertificateUrl() != null) {
+                    String url = certificate.getCertificateUrl();
+                    int idx = url.lastIndexOf('/')
+;
+                    if (idx != -1) {
+                        String fromUrl = url.substring(idx + 1);
+                        Path alt = base.resolve(fromUrl).normalize();
+                        if (!alt.startsWith(base)) {
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                        }
+                        if (Files.exists(alt)) {
+                            path = alt;
+                            fileName = fromUrl;
+                        }
+                    }
+                }
+            }
+
+            if (!Files.exists(path)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            Resource resource = new FileSystemResource(path.toFile());
+            long size = Files.size(path);
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                    .header("Content-Type", "application/pdf")
+                    .contentLength(size)
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    .header("Pragma", "no-cache")
+                    .header("Expires", "0")
+                    .body(resource);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @Operation(summary = "Terminate certification session", description = "Terminate a session without generating a certificate (e.g., user left the test)")
     @PostMapping("/sessions/{sessionId}/terminate")
     public ResponseEntity<ApiResponse<String>> terminateSession(
@@ -177,16 +240,81 @@ public class CertificationController {
         }
     }
 
-    // New: Retrieve proctor events across all users
-    @Operation(summary = "Get proctor events for all users", description = "Retrieve all proctor events across all certification sessions and users")
+    // New: Retrieve proctor events across all users, optionally filtered by userId, and include user names
+    @Operation(summary = "Get proctor events for all users", description = "Retrieve all proctor events across all certification sessions and users. Optionally filter by userId, and include user names.")
     @GetMapping("/proctor-events")
-    public ResponseEntity<ApiResponse<List<ProctorEvent>>> getAllProctorEvents() {
+    public ResponseEntity<ApiResponse<List<ProctorEventResponseDTO>>> getAllProctorEvents(@RequestParam(value = "userId", required = false) Long userId) {
         try {
-            List<ProctorEvent> events = certificationService.getAllProctorEvents();
-            return ResponseEntity.ok(ApiResponse.success(events));
+            List<ProctorEvent> events = (userId != null)
+                    ? certificationService.getProctorEventsByUserId(userId)
+                    : certificationService.getAllProctorEvents();
+
+            List<ProctorEventResponseDTO> payload = events.stream()
+                    .map(this::toProctorEventResponseDTO)
+                    .collect(java.util.stream.Collectors.toList());
+
+            return ResponseEntity.ok(ApiResponse.success(payload));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400, e.getMessage()));
         }
+    }
+
+    private ProctorEventResponseDTO toProctorEventResponseDTO(ProctorEvent event) {
+        CertificationSession session = event.getSession();
+        Long sessionId = (session != null) ? session.getId() : null;
+        edtech.afrilingo.user.User user = (session != null) ? session.getUser() : null;
+        Long uId = (user != null) ? user.getId() : null;
+        String firstName = (user != null) ? user.getFirstName() : null;
+        String lastName = (user != null) ? user.getLastName() : null;
+        String email = (user != null) ? user.getEmail() : null;
+        String userName;
+        if (firstName != null && !firstName.isBlank()) {
+            userName = (lastName != null && !lastName.isBlank()) ? (firstName + " " + lastName) : firstName;
+        } else {
+            userName = email; // fallback to email/username if no names
+        }
+
+        String eventTypeRaw = (event.getEventType() != null) ? event.getEventType().name() : null;
+        String eventTypeName = eventTypeRaw; // placeholder for a human-friendly label if needed later
+
+        return ProctorEventResponseDTO.builder()
+                .id(event.getId())
+                .eventType(eventTypeRaw)
+                .eventTypeName(eventTypeName)
+                .description(event.getDescription())
+                .timestamp(event.getTimestamp())
+                .confidenceScore(event.getConfidenceScore())
+                .flagged(event.isFlagged())
+                .sessionId(sessionId)
+                .userId(uId)
+                .userName(userName)
+                .build();
+    }
+
+    private CertificateResponseDTO toCertificateResponseDTO(Certificate cert) {
+        if (cert == null) return null;
+        edtech.afrilingo.user.User user = cert.getUser();
+        String firstName = (user != null) ? user.getFirstName() : null;
+        String lastName = (user != null) ? user.getLastName() : null;
+        String email = (user != null) ? user.getEmail() : null;
+        String userName;
+        if (firstName != null && !firstName.isBlank()) {
+            userName = (lastName != null && !lastName.isBlank()) ? (firstName + " " + lastName) : firstName;
+        } else {
+            userName = email;
+        }
+        return CertificateResponseDTO.builder()
+                .certificateId(cert.getCertificateId())
+                .languageTested(cert.getLanguageTested())
+                .proficiencyLevel(cert.getProficiencyLevel())
+                .finalScore(cert.getFinalScore())
+                .completedAt(cert.getCompletedAt())
+                .issuedAt(cert.getIssuedAt())
+                .certificateUrl(cert.getCertificateUrl())
+                .verified(cert.isVerified())
+                .userName(userName)
+                .userEmail(email)
+                .build();
     }
 
     // New: Retrieve proctor events for a specific user within a session (public)
@@ -211,11 +339,14 @@ public class CertificationController {
     }
 
     // New: Retrieve all certificates across all users
-    @Operation(summary = "Get all certificates", description = "Retrieve all issued certificates across all users")
+    @Operation(summary = "Get all certificates", description = "Retrieve all issued certificates across all users including user names")
     @GetMapping("/certificates/all")
-    public ResponseEntity<ApiResponse<List<Certificate>>> getAllCertificates() {
+    public ResponseEntity<ApiResponse<List<CertificateResponseDTO>>> getAllCertificates() {
         List<Certificate> certificates = certificationService.getAllCertificates();
-        return ResponseEntity.ok(ApiResponse.success(certificates));
+        List<CertificateResponseDTO> payload = certificates.stream()
+                .map(this::toCertificateResponseDTO)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(payload));
     }
     
     @Operation(summary = "Verify certificate", description = "Verify certificate by ID")
@@ -243,29 +374,36 @@ public class CertificationController {
     }
     
     @Operation(summary = "Download certificate", description = "Download certificate PDF file")
-    @GetMapping("/certificates/download/{fileName}")
+    @GetMapping(value = "/certificates/download/{fileName}", produces = "application/pdf")
     public ResponseEntity<Resource> downloadCertificate(@PathVariable String fileName) {
         try {
             // Get the configured certificate storage path from the PDF service
             String storagePath = certificationService.getCertificateStoragePath();
-            String filePath = storagePath + "/" + fileName;
-            Path path = Paths.get(filePath);
+            Path base = Paths.get(storagePath).toAbsolutePath().normalize();
+            Path path = base.resolve(fileName).normalize();
+            
+            // Prevent path traversal
+            if (!path.startsWith(base)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
             
             // Log the file path for debugging
-            System.out.println("Attempting to download certificate from path: " + filePath);
+            System.out.println("Attempting to download certificate from path: " + path.toString());
             
             if (!Files.exists(path)) {
-                System.out.println("Certificate file not found at path: " + filePath);
+                System.out.println("Certificate file not found at path: " + path.toString());
                 return ResponseEntity.notFound().build();
             }
             
             // Create resource from file
             Resource resource = new FileSystemResource(path.toFile());
+            long size = Files.size(path);
             
             // Set headers for file download
             return ResponseEntity.ok()
                     .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
                     .header("Content-Type", "application/pdf")
+                    .contentLength(size)
                     .header("Cache-Control", "no-cache, no-store, must-revalidate")
                     .header("Pragma", "no-cache")
                     .header("Expires", "0")
