@@ -24,7 +24,8 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Cacheable(cacheNames = COURSES_CACHE)
     public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+        // Use shallow fetch (only language pre-fetched) to avoid N+1 and large graphs
+        return courseRepository.findAllShallow();
     }
 
     @Override

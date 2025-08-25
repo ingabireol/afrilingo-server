@@ -32,11 +32,11 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
-    @JsonIgnoreProperties("questions")
+    @JsonIgnoreProperties({"questions", "hibernateLazyInitializer", "handler"})
     private Quiz quiz;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("question")
+    @JsonIgnoreProperties({"question", "hibernateLazyInitializer", "handler"})
     private List<Option> options;
     @Column(name = "certification_question")
     private Boolean certificationQuestion;

@@ -1,5 +1,6 @@
 package edtech.afrilingo.question;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      * @param quizId Quiz ID
      * @return List of questions
      */
+    @EntityGraph(attributePaths = {"options"})
     List<Question> findByQuizId(Long quizId);
 
     /**
@@ -21,6 +23,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      * @param questionType Question type
      * @return List of questions
      */
+    @EntityGraph(attributePaths = {"options"})
     List<Question> findByQuizIdAndQuestionType(Long quizId, QuestionType questionType);
 
     /**

@@ -1,5 +1,6 @@
 package edtech.afrilingo.course;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import jakarta.persistence.LockModeType;
@@ -15,4 +16,9 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM Course c WHERE c.id = :id")
     Course findByIdWithPessimisticLock(@Param("id") Long id);
+
+    // Shallow fetch to avoid N+1; prefetch language only
+    @EntityGraph(attributePaths = {"language"})
+    @Query("SELECT c FROM Course c")
+    List<Course> findAllShallow();
 }

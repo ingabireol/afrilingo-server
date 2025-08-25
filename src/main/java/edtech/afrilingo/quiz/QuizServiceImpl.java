@@ -30,7 +30,8 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public List<Quiz> getAllQuizzes() {
-        return quizRepository.findAll();
+        // Shallow fetch (prefetch lesson only) to avoid N+1 and heavy graphs
+        return quizRepository.findAllBy();
     }
 
     @Override
