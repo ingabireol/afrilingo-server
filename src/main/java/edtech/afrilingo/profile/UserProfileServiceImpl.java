@@ -34,6 +34,52 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     @Transactional
+    public UserProfile createOrUpdateUserProfile(Long userId, UserProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        // Update User entity
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+        userRepository.save(user);
+
+        // Find or create UserProfile
+        UserProfile profile = userProfileRepository.findByUserId(userId)
+                .orElse(new UserProfile());
+
+        profile.setUser(user);
+        profile.setCountry(request.getCountry());
+        profile.setFirstLanguage(request.getFirstLanguage());
+        profile.setReasonToLearn(request.getReasonToLearn());
+        profile.setProfilePicture(request.getProfilePicture());
+
+        if (request.getDailyReminders() != null) {
+            profile.setDailyReminders(request.getDailyReminders());
+        }
+        if (request.getDailyGoalMinutes() != null) {
+            profile.setDailyGoalMinutes(request.getDailyGoalMinutes());
+        }
+        if (request.getPreferredLearningTime() != null) {
+            profile.setPreferredLearningTime(request.getPreferredLearningTime());
+        }
+
+        if (request.getLanguagesToLearnIds() != null && !request.getLanguagesToLearnIds().isEmpty()) {
+            List<Language> languages = languageService.getLanguagesByIds(request.getLanguagesToLearnIds());
+            if (languages.size() != request.getLanguagesToLearnIds().size()) {
+                throw new ResourceNotFoundException("One or more languages could not be found.");
+            }
+            profile.setLanguagesToLearn(languages);
+        }
+
+        return userProfileRepository.save(profile);
+    }
+
+    @Override
+    @Transactional
     public UserProfile createOrUpdateUserProfile(Long userId, UserProfile userProfile) {
         // Find or create user profile
         UserProfile existingProfile = userProfileRepository.findByUserId(userId)

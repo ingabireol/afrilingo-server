@@ -17,6 +17,13 @@ public interface LanguageService {
      * @return Optional containing the language if found
      */
     Optional<Language> getLanguageById(Long id);
+
+    /**
+     * Get a list of languages by their IDs
+     * @param ids List of language IDs
+     * @return List of languages found
+     */
+    List<Language> getLanguagesByIds(List<Long> ids);
     
     /**
      * Get language by code (e.g., "SW" for Swahili)
