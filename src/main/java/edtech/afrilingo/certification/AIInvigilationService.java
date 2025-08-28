@@ -109,7 +109,7 @@ public class AIInvigilationService {
             }
             
             if (content.contains("\"looking_at_screen\": false")) {
-                recordProctorEvent(session, ProctorEventType.LOOKING_AWAY, 
+                recordProctorEvent(session, ProctorEventType.EXTENDED_LOOK_AWAY,
                     "User not looking at screen", 0.8);
             }
             

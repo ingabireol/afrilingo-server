@@ -661,3 +661,72 @@ Content-Type: application/json
 For backend support, please contact:
 - Email: backend-support@afrilingo.com
 - Developer Slack channel: #afrilingo-backend-support
+
+
+## Docker
+
+This project includes a multi-stage Dockerfile to build and run the Afrilingo Spring Boot application (Java 21).
+
+### Build the image
+
+```bash
+# From the project root
+docker build -t afrilingo:latest .
+```
+
+### Run the container
+
+```bash
+# Basic run (uses defaults from application.properties)
+docker run --name afrilingo -p 8081:8081 afrilingo:latest
+
+# Run with environment overrides (recommended)
+docker run \
+  --name afrilingo \
+  -p 8081:8081 \
+  -e JAVA_OPTS="-Xms256m -Xmx512m" \
+  -e SPRING_PROFILES_ACTIVE=prod \
+  -e SPRING_DATASOURCE_URL="jdbc:postgresql://<host>:5432/afrilingo_db" \
+  -e SPRING_DATASOURCE_USERNAME="afrilingo_db_user" \
+  -e SPRING_DATASOURCE_PASSWORD="<password>" \
+  afrilingo:latest
+```
+
+Notes:
+- The application listens on port 8081 inside the container; map this to your host as needed (e.g., -p 8081:8081).
+- You can pass any Spring property via environment variables using Spring Boot's relaxed binding. For example, `spring.datasource.url` becomes `SPRING_DATASOURCE_URL`.
+- For JVM tuning, set `JAVA_OPTS` (e.g., `-Xms256m -Xmx512m`).
+
+### Multi-container (PostgreSQL + App) example with Docker Compose
+
+Create a simple docker-compose.yml (example):
+
+```yaml
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: afrilingo_db
+      POSTGRES_USER: afrilingo_db_user
+      POSTGRES_PASSWORD: yourpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    image: afrilingo:latest
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/afrilingo_db
+      SPRING_DATASOURCE_USERNAME: afrilingo_db_user
+      SPRING_DATASOURCE_PASSWORD: yourpassword
+      SPRING_PROFILES_ACTIVE: prod
+      JAVA_OPTS: -Xms256m -Xmx512m
+    ports:
+      - "8081:8081"
+
+volumes:
+  db_data:
+```

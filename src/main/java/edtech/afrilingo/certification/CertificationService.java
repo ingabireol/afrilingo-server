@@ -211,7 +211,30 @@ public class CertificationService {
         
         proctorEventRepository.save(event);
         
-        // Update session suspicious activity count
+        // If this event signals that the session was terminated, ensure the
+        // certification session is marked completed and closed (no certificate).
+        if (eventType == ProctorEventType.SESSION_TERMINATED) {
+            if (!session.isCompleted()) {
+                session.setCompleted(true);
+                session.setPassed(false);
+                session.setFinalScore(0);
+                session.setEndTime(LocalDateTime.now());
+                // Record a session end proctor event as well for consistency
+                ProctorEvent endEvent = ProctorEvent.builder()
+                        .session(session)
+                        .eventType(ProctorEventType.SESSION_END)
+                        .description("Session terminated: " + description)
+                        .timestamp(LocalDateTime.now())
+                        .confidenceScore(0.0)
+                        .flagged(false)
+                        .build();
+                proctorEventRepository.save(endEvent);
+                sessionRepository.save(session);
+            }
+            return;
+        }
+
+        // Update session suspicious activity count for flagged events
         if (event.isFlagged()) {
             session.setSuspiciousActivityCount(session.getSuspiciousActivityCount() + 1);
             sessionRepository.save(session);
@@ -310,4 +333,45 @@ public class CertificationService {
         return certificateStoragePath;
     }
 
+    /**
+     * Terminates a certification session without generating a certificate.
+     * This is used when a user leaves/abandons the test or an admin/proctor forcibly ends it.
+     * The session will be marked completed=false->true, passed=false, finalScore=0 and endTime set.
+     * A SESSION_TERMINATED proctor event will be recorded with the provided reason.
+     */
+    @Transactional
+    public void terminateSession(Long sessionId, String reason) {
+        CertificationSession session = getSessionById(sessionId);
+        if (session.isCompleted()) {
+            throw new RuntimeException("Session already completed");
+        }
+        String desc = (reason == null || reason.isBlank()) ? "Session terminated by system" : reason.trim();
+        // Record a termination event; service logic will mark the session completed without certificate
+        recordProctorEvent(session, ProctorEventType.SESSION_TERMINATED, desc, 1.0);
+    }
+
+    // New: Retrieve proctor events for a specific user
+    public List<ProctorEvent> getProctorEventsByUserId(Long userId) {
+        return proctorEventRepository.findBySession_User_IdOrderByTimestampAsc(userId);
+    }
+
+    // New: Retrieve proctor events for a specific session
+    public List<ProctorEvent> getProctorEventsBySessionId(Long sessionId) {
+        return proctorEventRepository.findBySession_IdOrderByTimestampAsc(sessionId);
+    }
+
+    // New: Retrieve proctor events for all users
+    public List<ProctorEvent> getAllProctorEvents() {
+        return proctorEventRepository.findAllByOrderByTimestampAsc();
+    }
+
+    // New: Retrieve proctor events filtered by session and user
+    public List<ProctorEvent> getProctorEventsBySessionIdAndUserId(Long sessionId, Long userId) {
+        return proctorEventRepository.findBySession_IdAndSession_User_IdOrderByTimestampAsc(sessionId, userId);
+    }
+
+    // New: Retrieve all certificates across users, newest first
+    public List<Certificate> getAllCertificates() {
+        return certificateRepository.findAllByOrderByIssuedAtDesc();
+    }
 }

@@ -7,6 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import static edtech.afrilingo.config.CacheConfig.COURSES_CACHE;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,8 +22,10 @@ public class CourseServiceImpl implements CourseService {
     private final LanguageService languageService;
 
     @Override
+    @Cacheable(cacheNames = COURSES_CACHE)
     public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+        // Use shallow fetch (only language pre-fetched) to avoid N+1 and large graphs
+        return courseRepository.findAllShallow();
     }
 
     @Override
@@ -40,6 +45,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = COURSES_CACHE, allEntries = true)
     public Course createCourse(Course course) {
         // Validate course data
         if (course.getTitle() == null || course.getLanguage() == null || course.getLanguage().getId() == null) {
@@ -75,6 +81,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = COURSES_CACHE, allEntries = true)
     public Course updateCourse(Long id, Course courseDetails) {
         return courseRepository.findById(id)
                 .map(existingCourse -> {
@@ -114,6 +121,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = COURSES_CACHE, allEntries = true)
     public boolean deleteCourse(Long id) {
         return courseRepository.findById(id)
                 .map(course -> {
@@ -125,6 +133,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = COURSES_CACHE, allEntries = true)
     public Course setActivationStatus(Long id, boolean active) {
         return courseRepository.findById(id)
                 .map(course -> {

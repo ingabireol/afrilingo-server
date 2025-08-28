@@ -87,7 +87,7 @@ public class UserProgressController {
         userProgressRepository.save(progress);
         
         try {
-            wsNotifier.sendNotification(currentUser.getId(), "lesson_access:" + lessonId);
+            // Send only via authenticated user destination to avoid duplicates
             wsNotifier.sendNotificationToUser(currentUser.getUsername(), "lesson_access:" + lessonId);
         } catch (Exception ignored) {}
 
@@ -129,7 +129,7 @@ public class UserProgressController {
         userProgressRepository.save(progress);
         
         try {
-            wsNotifier.sendNotification(currentUser.getId(), "lesson_completed:" + lessonId);
+            // Send only via authenticated user destination to avoid duplicates
             wsNotifier.sendNotificationToUser(currentUser.getUsername(), "lesson_completed:" + lessonId);
         } catch (Exception ignored) {}
 
@@ -165,7 +165,7 @@ public class UserProgressController {
         userQuizAttemptRepository.save(attempt);
         
         try {
-            wsNotifier.sendNotification(currentUser.getId(), "quiz_attempt:" + quizId);
+            // Send only via authenticated user destination to avoid duplicates
             wsNotifier.sendNotificationToUser(currentUser.getUsername(), "quiz_attempt:" + quizId);
             if (passed) {
                 wsNotifier.sendNotificationToUser(currentUser.getUsername(), "challenge_passed:" + quizId);

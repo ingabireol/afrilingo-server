@@ -3,6 +3,7 @@ package edtech.afrilingo.quiz;
 import edtech.afrilingo.lesson.Lesson;
 import edtech.afrilingo.question.Question;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,10 +29,11 @@ public class Quiz {
 
     @ManyToOne
     @JoinColumn(name = "lesson_id")
-    @JsonIgnoreProperties("quizzes")
+    @JsonIgnoreProperties({"quizzes", "hibernateLazyInitializer", "handler"})
     private Lesson lesson;
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("quiz")
+    @JsonIgnore // fetch questions via dedicated endpoint to avoid huge payloads
     private List<Question> questions;
 }

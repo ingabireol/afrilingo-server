@@ -4,10 +4,14 @@ import edtech.afrilingo.course.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import static edtech.afrilingo.config.CacheConfig.LESSONS_CACHE;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,14 +21,25 @@ public class LessonServiceImpl implements LessonService {
     private final CourseService courseService;
 
     @Override
+    @Cacheable(cacheNames = LESSONS_CACHE)
     public List<Lesson> getAllLessons() {
         return lessonRepository.findAll();
     }
 
     @Override
     public List<Lesson> getLessonsByCourseId(Long courseId) {
-        return lessonRepository.findByCourseId(courseId);
+        return lessonRepository.findByCourseId(courseId)
+                .stream()
+                .collect(Collectors.toMap(
+                        Lesson::getTitle,      // use title as the key
+                        lesson -> lesson,      // value is the lesson itself
+                        (existing, duplicate) -> existing // keep the first one if duplicate
+                ))
+                .values()
+                .stream()
+                .toList();
     }
+
 
     @Override
     public List<Lesson> getLessonsByCourseIdOrdered(Long courseId) {
@@ -43,6 +58,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = LESSONS_CACHE, allEntries = true)
     public Lesson createLesson(Lesson lesson) {
         // Validate lesson data
         if (lesson.getTitle() == null || lesson.getCourse() == null || lesson.getCourse().getId() == null) {
@@ -72,6 +88,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = LESSONS_CACHE, allEntries = true)
     public Lesson updateLesson(Long id, Lesson lessonDetails) {
         return lessonRepository.findById(id)
                 .map(existingLesson -> {

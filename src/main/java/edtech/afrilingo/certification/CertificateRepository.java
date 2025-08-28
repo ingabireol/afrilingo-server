@@ -17,4 +17,7 @@ public interface CertificateRepository extends JpaRepository<Certificate, Long> 
     List<Certificate> findByLanguageTestedAndVerified(String language, boolean verified);
     
     boolean existsByUserAndLanguageTestedAndVerified(User user, String language, boolean verified);
+
+    // New: Fetch all certificates ordered by issued date (newest first)
+    List<Certificate> findAllByOrderByIssuedAtDesc();
 }

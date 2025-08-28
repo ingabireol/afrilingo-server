@@ -12,6 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserProfileRequest {
+    private String firstName;
+    private String lastName;
     private String country;
     private String firstLanguage;
     private String reasonToLearn;

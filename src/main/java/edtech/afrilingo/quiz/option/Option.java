@@ -25,6 +25,6 @@ public class Option {
 
     @ManyToOne
     @JoinColumn(name = "question_id")
-    @JsonIgnoreProperties("options")
+    @JsonIgnoreProperties({"options", "hibernateLazyInitializer", "handler"})
     private Question question;
 }

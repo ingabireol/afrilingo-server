@@ -56,35 +56,7 @@ public class UserProfileController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
 
-        UserProfile profile = new UserProfile();
-        profile.setCountry(request.getCountry());
-        profile.setFirstLanguage(request.getFirstLanguage());
-        profile.setReasonToLearn(request.getReasonToLearn());
-        profile.setProfilePicture(request.getProfilePicture());
-
-        if (request.getDailyReminders() != null) {
-            profile.setDailyReminders(request.getDailyReminders());
-        }
-
-        if (request.getDailyGoalMinutes() != null) {
-            profile.setDailyGoalMinutes(request.getDailyGoalMinutes());
-        }
-
-        if (request.getPreferredLearningTime() != null) {
-            profile.setPreferredLearningTime(request.getPreferredLearningTime());
-        }
-
-        // Set languages to learn if provided
-        if (request.getLanguagesToLearnIds() != null && !request.getLanguagesToLearnIds().isEmpty()) {
-            List<Language> languages = request.getLanguagesToLearnIds().stream()
-                    .map(id -> languageService.getLanguageById(id)
-                            .orElseThrow(() -> new ResourceNotFoundException("Language", "id", id)))
-                    .collect(Collectors.toList());
-
-            profile.setLanguagesToLearn(languages);
-        }
-
-        UserProfile savedProfile = userProfileService.createOrUpdateUserProfile(currentUser.getId(), profile);
+        UserProfile savedProfile = userProfileService.createOrUpdateUserProfile(currentUser.getId(), request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

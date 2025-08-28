@@ -22,7 +22,7 @@ public class CertificatePDFService {
     @Value("${afrilingo.certificates.storage-path:/tmp/certificates}")
     private String certificateStoragePath;
     
-    @Value("${afrilingo.certificates.base-url:http://10.0.2.2:8080/api/v1/certification/certificates}")
+    @Value("${afrilingo.certificates.base-url}")
     private String certificateBaseUrl;
     
     public String generateCertificatePDF(Certificate certificate) {
@@ -56,17 +56,16 @@ public class CertificatePDFService {
                     fos.write(baos.toByteArray());
                 }
                 
-                // Return URL to access the certificate
+                // Return URL to access the certificate (used by API), but log the filesystem path to avoid confusion
                 certificateUrl = certificateBaseUrl + "/download/" + fileName;
-                log.info("Certificate PDF generated and saved to file: {}", certificateUrl);
+                log.info("Certificate PDF generated and saved to path: {}", filePath.toAbsolutePath());
                 
             } catch (Exception fileSystemError) {
                 log.warn("Failed to save certificate to file system (read-only?), generating downloadable URL instead: {}", fileSystemError.getMessage());
                 
-                // If file system is read-only, generate a data URL or temporary download link
-                // For now, return a placeholder URL that indicates the certificate exists but file access failed
+                // If file system is read-only, generate a placeholder URL for API consumers; avoid logging the URL if undesired
                 certificateUrl = certificateBaseUrl + "/download/" + certificate.getCertificateId();
-                log.info("Certificate PDF generated in memory, download URL: {}", certificateUrl);
+                log.info("Certificate PDF generated in memory; file system storage unavailable. Using download endpoint placeholder for client response.");
             }
             
             return certificateUrl;

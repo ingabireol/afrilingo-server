@@ -24,6 +24,11 @@ public class LanguageServiceImpl implements LanguageService {
     }
 
     @Override
+    public List<Language> getLanguagesByIds(List<Long> ids) {
+        return languageRepository.findAllByIdIn(ids);
+    }
+
+    @Override
     public Optional<Language> getLanguageByCode(String code) {
         return languageRepository.findByCode(code);
     }

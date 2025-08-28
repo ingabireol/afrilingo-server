@@ -24,6 +24,14 @@ public interface UserProfileService {
      * @param userProfile User profile data
      * @return Created or updated user profile
      */
+    UserProfile createOrUpdateUserProfile(Long userId, UserProfileRequest userProfileRequest);
+    
+    /**
+     * Create or update user profile
+     * @param userId User ID
+     * @param userProfile User profile data
+     * @return Created or updated user profile
+     */
     UserProfile createOrUpdateUserProfile(Long userId, UserProfile userProfile);
     
     /**

@@ -1,5 +1,6 @@
 package edtech.afrilingo.quiz;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -7,11 +8,14 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
+    @EntityGraph(attributePaths = {"lesson"})
+    List<Quiz> findAllBy();
     /**
      * Find quizzes by lesson ID
      * @param lessonId Lesson ID
      * @return List of quizzes
      */
+    @EntityGraph(attributePaths = {"lesson"})
     List<Quiz> findByLessonId(Long lessonId);
 
     /**
@@ -26,6 +30,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
      * @param lessonId Lesson ID
      * @return List of quizzes ordered by title
      */
+    @EntityGraph(attributePaths = {"lesson"})
     List<Quiz> findByLessonIdOrderByTitle(Long lessonId);
 
     /**
@@ -48,6 +53,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
      * @param quizId Quiz ID
      * @return Pass rate ratio (0-1)
      */
+    @EntityGraph(attributePaths = {"lesson"})
     @Query("SELECT CASE WHEN COUNT(uqa2) > 0 THEN " +
             "(SELECT COUNT(uqa) FROM UserQuizAttempt uqa WHERE uqa.quiz.id = :quizId AND uqa.passed = true) / " +
             "CAST(COUNT(uqa2) AS float) ELSE 0 END " +

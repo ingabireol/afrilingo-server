@@ -12,6 +12,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 //import static org.springframework.http.HttpMethod.DELETE;
 //import static org.springframework.http.HttpMethod.GET;
@@ -44,8 +50,23 @@ public class SecurityConfiguration {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+        configuration.setExposedHeaders(List.of("x-auth-token"));
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> req
                         .requestMatchers("/api/v1/auth/**").permitAll()
@@ -60,8 +81,24 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/profile/**").permitAll()
                         .requestMatchers("/api/admin/data-loader/**").permitAll()
                         .requestMatchers("/api/v1/certification/certificates/download/**").permitAll()
+                        // Public: Proctor events for specific users
+                        .requestMatchers("/api/v1/certification/**").permitAll()
+                        .requestMatchers("/api/v1/certification/users/*/proctor-events").permitAll()
+                        .requestMatchers("api/v1/certification/sessions/{sessionId}/proctor-events").permitAll()
+                        .requestMatchers("/api/v1/certification/certificates/**").authenticated()
+
+                        .requestMatchers("/api/v1/users/**").permitAll()
                         // WebSocket endpoints
-                        .requestMatchers("/ws", "/ws/**").permitAll()
+                        .requestMatchers(
+                                "/ws", 
+                                "/ws/**",
+                                "/websocket/**",
+                                "/stomp/**",
+                                "/topic/**",
+                                "/app/**",
+                                "/queue/**",
+                                "/user/**"
+                        ).permitAll()
                         // Error endpoints
                         .requestMatchers("/error").permitAll()
                         // All other endpoints require authentication

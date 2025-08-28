@@ -4,6 +4,7 @@ import edtech.afrilingo.course.Course;
 import edtech.afrilingo.lesson.content.LessonContent;
 import edtech.afrilingo.quiz.Quiz;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,14 +33,16 @@ public class Lesson {
 
     @ManyToOne
     @JoinColumn(name = "course_id")
-    @JsonIgnoreProperties("lessons")
+    @JsonIgnoreProperties({"lessons", "hibernateLazyInitializer", "handler"})
     private Course course;
 
     @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("lesson")
+    @JsonIgnore // prevent large content graphs on lesson responses
     private List<LessonContent> contents;
 
     @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("lesson")
+    @JsonIgnore // prevent large quiz/question graphs on lesson responses
     private List<Quiz> quizzes;
 }

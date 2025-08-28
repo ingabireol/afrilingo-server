@@ -411,9 +411,9 @@ public class DataLoaderService {
             createUserWithProfile(
                 "Jane",
                 "Smith",
-                "jane@example.com",
+                "proctor@gmail.com",
                 "728728Clb@",
-                Role.ROLE_USER,
+                Role.ROLE_PROCTOR,
                 "Kenya",
                 "English",
                 "Travel to East Africa",
@@ -891,16 +891,9 @@ public class DataLoaderService {
                     .quiz(quiz)
                     .build();
 
-            Question q6 = Question.builder()
-                    .questionText("The word for 'teacher' is '_____'.")
-                    .questionType(QuestionType.FILL_BLANK)
-                    .points(1)
-                    .quiz(quiz)
-                    .build();
 
             questions.add(q4);
             questions.add(q5);
-            questions.add(q6);
 
             // Removed OPEN_ENDED from quizzes per requirement: quizzes are not open-ended
         } else if ("SW".equals(languageCode)) {

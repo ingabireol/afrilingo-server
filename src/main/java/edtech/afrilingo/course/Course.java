@@ -48,10 +48,11 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "language_id")
-    @JsonIgnoreProperties("courses")
+    @JsonIgnoreProperties({"courses", "hibernateLazyInitializer", "handler"})
     private Language language;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("course")
+    @JsonIgnore // prevent deep graph serialization on list endpoints
     private List<Lesson> lessons;
 }

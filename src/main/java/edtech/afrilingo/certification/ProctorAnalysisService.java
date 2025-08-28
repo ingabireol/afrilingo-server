@@ -53,7 +53,7 @@ public class ProctorAnalysisService {
                 case SCREENSHOT_ATTEMPT:
                     criticalEvents++;
                     break;
-                case LOOKING_AWAY:
+                case EXTENDED_LOOK_AWAY:
                 case SUSPICIOUS_MOVEMENT:
                 case BROWSER_TAB_CHANGE:
                     if (event.getConfidenceScore() > 0.9) {
