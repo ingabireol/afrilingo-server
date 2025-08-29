@@ -1,7 +1,8 @@
 package edtech.afrilingo.lesson;
 
+import edtech.afrilingo.lesson.content.LessonContent;
+import edtech.afrilingo.lesson.content.LessonContentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 public class LessonController {
 
     private final  LessonService lessonService;
+    private final LessonContentService lessonContentService;
 
     @GetMapping
     public ResponseEntity<List<Lesson>> getAllLessons() {
@@ -25,6 +27,13 @@ public class LessonController {
         return lessonService.getLessonById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/contents")
+    public ResponseEntity<List<LessonContent>> getLessonContents(@PathVariable Long id) {
+        // Always succeed with empty list if none, to keep frontend simple
+        List<LessonContent> contents = lessonContentService.getLessonContentsByLessonId(id);
+        return ResponseEntity.ok(contents);
     }
 
     @GetMapping("/course/{courseId}")
