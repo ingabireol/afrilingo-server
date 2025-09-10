@@ -20,6 +20,7 @@ public class CertificateResponseDTO {
     private LocalDateTime issuedAt;
     private String certificateUrl;
     private boolean verified;
+    private String certificatePdfBase64;
     
     // User information (minimal to avoid circular references)
     private String userName;

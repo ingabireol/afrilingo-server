@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +39,9 @@ public class CertificatePDFService {
             addCertificateContent(document, certificate);
             
             document.close();
+            // Encode PDF bytes to Base64 and store on the entity so it can be persisted
+            String base64Pdf = Base64.getEncoder().encodeToString(baos.toByteArray());
+            certificate.setCertificatePdfBase64(base64Pdf);
             
             // Try to save to file system first
             String fileName = "certificate_" + certificate.getCertificateId() + ".pdf";

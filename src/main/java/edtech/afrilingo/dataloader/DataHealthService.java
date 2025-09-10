@@ -131,8 +131,9 @@ public class DataHealthService {
         Map<String, Object> status = new HashMap<>();
         long count = languageRepository.count();
         status.put("count", count);
-        status.put("healthy", count >= 3); // At least 3 languages should be present
-        status.put("message", count >= 3 ? "Languages data is healthy" : "Missing language data");
+        // Align with seeded data: currently we seed 2 languages (RW, SW)
+        status.put("healthy", count >= 2);
+        status.put("message", count >= 2 ? "Languages data is healthy" : "Missing language data");
         return status;
     }
     

@@ -13,4 +13,5 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
     List<Lesson> findByType(LessonType type);
     List<Lesson> findByCourseIdAndOrderIndexGreaterThan(Long courseId, Integer orderIndex);
     int countByCourseId(Long courseId);
+    boolean existsByCourseIdAndTitle(Long courseId, String title);
 }

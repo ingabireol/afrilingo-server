@@ -32,6 +32,11 @@ public class Certificate {
     private String certificateUrl; // URL to PDF certificate
     private boolean verified;
     
+    // Store the certificate PDF as Base64 to allow direct retrieval
+    @Lob
+    @Column(name = "certificate_pdf_base64")
+    private String certificatePdfBase64;
+    
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore  // Prevent circular reference

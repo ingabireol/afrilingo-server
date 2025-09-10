@@ -76,13 +76,13 @@ public class DataLoaderService {
                             .name("Kinyarwanda")
                             .code("RW")
                             .description("Kinyarwanda is the official language of Rwanda, spoken by almost the entire population.")
-                            .flagImage("rwanda-flag.png")
+                            .flagImage("https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Flag_of_Rwanda.svg/2560px-Flag_of_Rwanda.svg.png")
                             .build(),
                     Language.builder()
                             .name("Kiswahili")
                             .code("SW")
                             .description("Kiswahili is widely spoken across East Africa and is an official language in Kenya, Tanzania, and Uganda.")
-                            .flagImage("swahili-flag.png")
+                            .flagImage("https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Kenya.svg/330px-Flag_of_Kenya.svg.png")
                             .build()
             );
 
@@ -250,12 +250,19 @@ public class DataLoaderService {
             for (Course course : courses) {
                 String languageCode = course.getLanguage().getCode();
                 String level = course.getLevel();
+                String courseTitle = course.getTitle();
 
-                // Lesson topics based on language and level
-                List<LessonData> lessonDataList = getLessonDataForCourse(languageCode, level);
+                // Lesson topics based on language, level, and course title
+                List<LessonData> lessonDataList = getLessonDataForCourse(languageCode, level, courseTitle);
 
                 for (int i = 0; i < lessonDataList.size(); i++) {
                     LessonData lessonData = lessonDataList.get(i);
+
+                    // Idempotency: skip if lesson with same title already exists for this course
+                    if (lessonRepository.existsByCourseIdAndTitle(course.getId(), lessonData.getTitle())) {
+                        continue;
+                    }
+
                     lessons.add(Lesson.builder()
                             .title(lessonData.getTitle())
                             .description(lessonData.getDescription())
@@ -469,20 +476,100 @@ public class DataLoaderService {
 
     // Helper methods for generating sample data
 
-    private List<LessonData> getLessonDataForCourse(String languageCode, String level) {
+    private List<LessonData> getLessonDataForCourse(String languageCode, String level, String courseTitle) {
         List<LessonData> lessonData = new ArrayList<>();
 
-        // Basic lessons for all languages and levels
-        lessonData.add(new LessonData("Greetings and Introductions",
-                "Learn how to greet people and introduce yourself", LessonType.AUDIO));
-        lessonData.add(new LessonData("Numbers and Counting",
-                "Master numbers and basic counting", LessonType.AUDIO));
-        lessonData.add(new LessonData("Family Members",
-                "Learn vocabulary for family relationships", LessonType.IMAGE_OBJECT));
-        lessonData.add(new LessonData("Days and Months",
-                "Learn the names of days and months", LessonType.READING));
-        lessonData.add(new LessonData("Common Phrases",
-                "Essential everyday expressions", LessonType.AUDIO));
+        // Tailor lessons to course title to avoid duplicating the same topics across all courses
+        String title = courseTitle == null ? "" : courseTitle;
+        boolean isGenericLevelCourse = title.contains("Beginner") || title.contains("Intermediate") || title.contains("Advanced");
+
+        if (isGenericLevelCourse) {
+            // Generic foundational topics for level-based courses
+            lessonData.add(new LessonData("Greetings and Introductions",
+                    "Learn how to greet people and introduce yourself", LessonType.AUDIO));
+            lessonData.add(new LessonData("Numbers and Counting",
+                    "Master numbers and basic counting", LessonType.AUDIO));
+            lessonData.add(new LessonData("Family Members",
+                    "Learn vocabulary for family relationships", LessonType.IMAGE_OBJECT));
+            lessonData.add(new LessonData("Days and Months",
+                    "Learn the names of days and months", LessonType.READING));
+            lessonData.add(new LessonData("Common Phrases",
+                    "Essential everyday expressions", LessonType.AUDIO));
+        } else if (title.contains("Business")) {
+            lessonData.add(new LessonData("Business Etiquette",
+                    "Professional etiquette and introductions in business settings", LessonType.AUDIO));
+            lessonData.add(new LessonData("Meetings and Presentations",
+                    "Key phrases and structures for meetings", LessonType.READING));
+            lessonData.add(new LessonData("Negotiation Vocabulary",
+                    "Terms used in negotiation and contracts", LessonType.READING));
+            lessonData.add(new LessonData("Customer Communication",
+                    "Email and phone support communication", LessonType.AUDIO));
+            lessonData.add(new LessonData("Workplace Scenarios",
+                    "Role-play common workplace situations", LessonType.IMAGE_OBJECT));
+        } else if (title.contains("Grammar")) {
+            lessonData.add(new LessonData("Noun Classes",
+                    "Deep dive into noun classes and agreement", LessonType.READING));
+            lessonData.add(new LessonData("Verb Conjugations",
+                    "Present, past, and future conjugations", LessonType.READING));
+            lessonData.add(new LessonData("Complex Sentences",
+                    "Subordinate clauses and connectors", LessonType.READING));
+            lessonData.add(new LessonData("Common Errors",
+                    "Avoiding frequent grammar mistakes", LessonType.AUDIO));
+            lessonData.add(new LessonData("Practice Drills",
+                    "Applied grammar exercises", LessonType.AUDIO));
+        } else if (title.contains("Conversational")) {
+            lessonData.add(new LessonData("Introductions and Small Talk",
+                    "Natural dialogues for daily interactions", LessonType.AUDIO));
+            lessonData.add(new LessonData("Asking for Help",
+                    "Polite requests and clarifications", LessonType.AUDIO));
+            lessonData.add(new LessonData("At the Market",
+                    "Buying and bargaining", LessonType.IMAGE_OBJECT));
+            lessonData.add(new LessonData("Directions and Transport",
+                    "Moving around town", LessonType.AUDIO));
+            lessonData.add(new LessonData("Health and Emergencies",
+                    "Describing symptoms and getting help", LessonType.READING));
+        } else if (title.contains("Healthcare")) {
+            lessonData.add(new LessonData("At the Clinic",
+                    "Registering and explaining symptoms", LessonType.AUDIO));
+            lessonData.add(new LessonData("Medical Vocabulary",
+                    "Body parts and common conditions", LessonType.READING));
+            lessonData.add(new LessonData("Giving Instructions",
+                    "Dosage and aftercare", LessonType.READING));
+            lessonData.add(new LessonData("Emergency Situations",
+                    "Urgent phrases and responses", LessonType.AUDIO));
+            lessonData.add(new LessonData("Patient Dialogue",
+                    "Doctor-patient role play", LessonType.IMAGE_OBJECT));
+        } else if (title.contains("Academic")) {
+            lessonData.add(new LessonData("Academic Writing",
+                    "Structure and style", LessonType.READING));
+            lessonData.add(new LessonData("Research Vocabulary",
+                    "Terms for research and study", LessonType.READING));
+            lessonData.add(new LessonData("Presentations",
+                    "Presenting academic work", LessonType.AUDIO));
+            lessonData.add(new LessonData("Reading Comprehension",
+                    "Understanding scholarly texts", LessonType.READING));
+            lessonData.add(new LessonData("Seminar Discussions",
+                    "Participating in seminars", LessonType.AUDIO));
+        } else if (title.contains("Pronunciation")) {
+            lessonData.add(new LessonData("Vowels and Consonants",
+                    "Core sound system", LessonType.AUDIO));
+            lessonData.add(new LessonData("Tone and Stress",
+                    "Prosody and rhythm", LessonType.AUDIO));
+            lessonData.add(new LessonData("Minimal Pairs",
+                    "Practice distinguishing sounds", LessonType.AUDIO));
+            lessonData.add(new LessonData("Common Pitfalls",
+                    "Correcting frequent mistakes", LessonType.READING));
+            lessonData.add(new LessonData("Applied Practice",
+                    "Reading and speaking practice", LessonType.AUDIO));
+        } else {
+            // Fallback minimal set to avoid duplication in unspecified courses
+            lessonData.add(new LessonData("Course Introduction",
+                    "Overview of objectives and outcomes", LessonType.READING));
+            lessonData.add(new LessonData("Key Vocabulary",
+                    "Core terms for this course", LessonType.AUDIO));
+            lessonData.add(new LessonData("Practice Tasks",
+                    "Applied activities", LessonType.IMAGE_OBJECT));
+        }
 
         // Add level-specific lessons
         if ("Beginner".equals(level)) {
@@ -520,17 +607,13 @@ public class DataLoaderService {
                     "Exploring literary expressions", LessonType.READING));
         }
 
-        // Add language-specific lessons
+        // Add language-specific lessons (lightweight, not to overwhelm course-specific tailoring)
         if ("RW".equals(languageCode)) {
-            lessonData.add(new LessonData("Advanced Grammar",
-                    "Master complex Kinyarwanda grammar structures", LessonType.READING));
-            lessonData.add(new LessonData("Business Kinyarwanda",
-                    "Professional Kinyarwanda for workplace communication", LessonType.AUDIO));
+            lessonData.add(new LessonData("Kinyarwanda Culture",
+                    "Important cultural notes", LessonType.READING));
         } else if ("SW".equals(languageCode)) {
-            lessonData.add(new LessonData("East African Customs",
-                    "Cultural practices across East Africa", LessonType.READING));
-            lessonData.add(new LessonData("Coastal Swahili",
-                    "Dialect variations along the coast", LessonType.AUDIO));
+            lessonData.add(new LessonData("Swahili Culture",
+                    "Cultural practices and context", LessonType.READING));
         }
 
         return lessonData;
@@ -808,6 +891,11 @@ public class DataLoaderService {
     }
 
     private void createQuestionsForQuiz(Quiz quiz, String languageCode) {
+        // Idempotency guard: if questions already exist for this quiz, do not recreate
+        if (questionRepository.countByQuizId(quiz.getId()) > 0) {
+            return;
+        }
+
         List<Question> questions = new ArrayList<>();
         Lesson lesson = quiz.getLesson();
         String lessonTitle = lesson.getTitle();
@@ -1631,6 +1719,11 @@ public class DataLoaderService {
     }
 
     private void createOptionsForQuestion(Question question, String languageCode) {
+        // Idempotency guard: if options already exist for this question, do not recreate
+        if (optionRepository.countByQuestionId(question.getId()) > 0) {
+            return;
+        }
+
         List<Option> options = new ArrayList<>();
         QuestionType type = question.getQuestionType();
         String questionText = question.getQuestionText();

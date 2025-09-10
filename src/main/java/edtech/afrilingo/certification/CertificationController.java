@@ -437,4 +437,8 @@ public class CertificationController {
             return ResponseEntity.ok(ApiResponse.error(500, "Error checking certificate: " + e.getMessage()));
         }
     }
+
+
+
+
 }

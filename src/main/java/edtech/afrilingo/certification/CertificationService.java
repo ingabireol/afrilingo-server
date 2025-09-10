@@ -159,6 +159,7 @@ public class CertificationService {
                     .completedAt(certificate.getCompletedAt())
                     .issuedAt(certificate.getIssuedAt())
                     .certificateUrl(certificate.getCertificateUrl())
+                    .certificatePdfBase64(certificate.getCertificatePdfBase64())
                     .verified(certificate.isVerified())
                     .userName(session.getUser().getFirstName() + " " + session.getUser().getLastName())
                     .userEmail(session.getUser().getEmail())
